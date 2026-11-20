@@ -13,3 +13,9 @@ The supplied HTML and workbook specify separate finding-rebuttal and post-accept
 **Why:** These are the source workbench's defining organisational controls, not independently verified universal ISO requirements.
 
 **How to apply:** Preserve the acceptance-before-RCA gate and all four signoffs when evolving workflows. Verify normative clause mappings and editions against licensed standards before production use. Source friction definitions differ between dashboard and extraction report; keep thresholds explicit rather than presenting them as ISO rules.
+
+Use public sources for the ISO clause knowledge graph and GraphRAG.
+
+**Why:** The user explicitly instructed: "Take from the open sources of clauses and ISOs mentioned in the documents".
+
+**How to apply:** Source and cite accessible authoritative material, keep editions separate, and disclose gaps where full clause text is not openly available. Public availability is not permission to reproduce entire copyrighted standards.
