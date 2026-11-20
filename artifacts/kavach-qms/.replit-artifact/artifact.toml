@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Kavach — Defence Quality & Assurance"
+description = "Interactive product design for integrated defence QMS/IMS, auditor–auditee rebuttals, 8D corrective action, governance gates and solution architecture."
+version = "1.0.0"
+id = "artifacts/kavach-qms"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21852
+
+[services.development]
+run = "pnpm --filter @workspace/kavach-qms run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/kavach-qms", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/kavach-qms/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21852"
+BASE_PATH = "/"

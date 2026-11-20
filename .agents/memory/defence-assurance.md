@@ -1,0 +1,15 @@
+---
+name: Defence assurance product scope
+description: User's intended audience and source-workbench governance semantics.
+---
+The user wants a professional end-to-end auditor/auditee QMS/IMS product design suitable for an Indian Army Defence proposal and reusable for implementing the full solution. Coverage includes NABL laboratories and the listed laboratory, quality, certification, inspection, AI-management and software lifecycle/process-assessment frameworks.
+
+**Why:** The user requested product design and workflows to propose the niche solution, not a claim of accreditation or production security.
+
+**How to apply:** Keep demonstrable prototype behaviour distinct from future production deployment, identity, AI and classified-data controls. Do not imply official endorsement.
+
+The supplied HTML and workbook specify separate finding-rebuttal and post-acceptance D1–D8 RCA loops, separate iteration counts, and a four-signoff closure gate: auditor and auditee each sign impartiality and confidentiality declarations.
+
+**Why:** These are the source workbench's defining organisational controls, not independently verified universal ISO requirements.
+
+**How to apply:** Preserve the acceptance-before-RCA gate and all four signoffs when evolving workflows. Verify normative clause mappings and editions against licensed standards before production use. Source friction definitions differ between dashboard and extraction report; keep thresholds explicit rather than presenting them as ISO rules.

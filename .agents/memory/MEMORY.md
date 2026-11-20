@@ -1,0 +1,1 @@
+- [Defence assurance product scope](defence-assurance.md) — proposal prototype for Indian Army/NABL audiences and attachment-derived governance rules.

@@ -1,0 +1,278 @@
+import type { Finding, Rca, State, Msg, Role } from './types';
+import { digest } from './digest';
+
+const m = (role: Role, round: number, text: string, at: string, kind = 'comment'): Msg => ({ role, round, text, at, kind });
+
+export const emptyRca = (status: Rca['status'] = 'Locked'): Rca => ({
+  status,
+  d1: '',
+  d2: { what: '', where: '', when: '', who: '', why: '', how: '', howMany: '' },
+  d3: '',
+  whys: ['', '', '', '', ''],
+  rootCause: '',
+  escapePoint: '',
+  d5: '',
+  d6: '',
+  d7: '',
+  d8: '',
+  p2Iterations: 0,
+  p2History: [],
+  naReason: '',
+});
+
+const noEff = { verified: false, note: '', at: '' };
+const noEsc = { active: false, reason: '', at: '' };
+
+const findings: Finding[] = [
+  {
+    id: 'AUD-001', auditId: 'AP-26-01', frameworkId: 'iso17025', clause: '6.4.5',
+    title: 'Expired calibration on HIL signal generator',
+    classification: 'Major NC',
+    evidence: 'Hardware-in-the-loop signal generator S/N 8842 was found in the primary measurement path of HIL bench 2. Calibration certificate CAL-2025-614 expired 2026-01-30. Raw telemetry header of test run #402 (2026-02-13) records S/N 8842 as stimulus source; 14 days elapsed beyond due date with no recorded intermediate check.',
+    raisedAt: '2026-02-17T09:40:00Z', p1Status: 'Accepted', p1Iterations: 2,
+    p1History: [
+      m('Auditor', 0, 'Finding issued with objective evidence: run #402 header, asset card, certificate CAL-2025-614.', '2026-02-17T09:40:00Z', 'issued'),
+      m('Auditee', 1, 'Unit was staged in standby rack and was not part of the primary measurement path.', '2026-02-18T06:12:00Z', 'challenge'),
+      m('Auditor', 1, 'Maintained: test run #402 raw telemetry header explicitly logs S/N 8842 as source.', '2026-02-18T11:02:00Z', 'maintain'),
+      m('Auditee', 2, 'Confirmed log #402; S/N 8842 quarantined. Major NC accepted.', '2026-02-19T05:30:00Z', 'accept'),
+    ],
+    rca: {
+      status: 'Accepted',
+      d1: 'Metrology lead (sample), HIL bench engineer, QA representative, LIMS administrator',
+      d2: { what: 'Signal generator used past calibration due date', where: 'HIL bench 2, Signals Test Laboratory', when: '2026-01-30 to 2026-02-13', who: 'Bench operators, shift B', why: 'No automated interlock on expired assets', how: 'Manual sticker check missed', howMany: '1 asset, 6 test runs' },
+      d3: 'Quarantined S/N 8842; re-ran test #402 and five affected runs on calibrated backup S/N 9104.',
+      whys: ['Expired generator used in run #402', 'Operator relied on visual sticker check', 'Bench runner does not query LIMS asset status', 'LIMS integration was descoped in 2024 bench upgrade', 'No change-impact review on metrology controls'],
+      rootCause: 'LIMS lacked an automated lock on expired assets at the bench runner.',
+      escapePoint: 'Manual pre-run sticker verification.',
+      d5: 'Integrated LIMS calibration status check into bench runner pre-flight; S/N 8842 recalibrated (CAL-2026-991).',
+      d6: 'LIMS block test log and comparative waveform analysis showing no drift beyond uncertainty budget.',
+      d7: 'Lab SOP-04 revised; 30-day automated expiry alerts enabled for all benches.',
+      d8: 'Preventive lock script shared across three test benches; lesson recorded in metrology register.',
+      p2Iterations: 2,
+      p2History: [
+        m('Auditee', 1, 'Submitted 8D v1 with new calibration certificate.', '2026-03-02T07:00:00Z', 'submit'),
+        m('Auditor', 1, 'Rejected v1: missing retrospective impact assessment for tests run in expired window.', '2026-03-04T10:15:00Z', 'reject'),
+        m('Auditee', 2, 'Added comparative waveform analysis for six affected runs.', '2026-03-09T06:45:00Z', 'submit'),
+        m('Auditor', 2, 'Accepted v2. Impact assessment adequate.', '2026-03-11T09:20:00Z', 'accept'),
+      ],
+      naReason: '',
+    },
+    effectiveness: { verified: true, note: 'Attempted run with deliberately expired test asset blocked by runner on 2026-04-02.', at: '2026-04-03T08:00:00Z' },
+    closedAt: '', escalation: noEsc,
+  },
+  {
+    id: 'AUD-002', auditId: 'AP-26-01', frameworkId: 'iso17025', clause: '7.5.1',
+    title: 'Telemetry records missing operator and checksum',
+    classification: 'Minor NC',
+    evidence: 'Sampled 12 telemetry capture files from February acceptance tests. 4 of 12 (files TLM-0217-03, -05, -09, -11) carry no operator identification and no integrity checksum, so the record cannot be shown to be unaltered or attributable to the person performing the activity.',
+    raisedAt: '2026-02-17T12:10:00Z', p1Status: 'Issued', p1Iterations: 0,
+    p1History: [m('Auditor', 0, 'Finding issued. Sample list attached as EV-0004.', '2026-02-17T12:10:00Z', 'issued')],
+    rca: emptyRca(), effectiveness: noEff, closedAt: '', escalation: noEsc,
+  },
+  {
+    id: 'AUD-003', auditId: 'AP-26-01', frameworkId: 'iso17025', clause: '4.1.4',
+    title: 'Unassessed impartiality risk in test sign-off',
+    classification: 'Minor NC',
+    evidence: 'The test engineer who authored the firmware under test also authorised the acceptance test report TR-118. The laboratory impartiality risk register (rev 3) does not identify this relationship, nor show how the risk is eliminated or minimised.',
+    raisedAt: '2026-02-18T08:00:00Z', p1Status: 'In Rebuttal', p1Iterations: 2,
+    p1History: [
+      m('Auditor', 0, 'Finding issued against impartiality risk identification.', '2026-02-18T08:00:00Z', 'issued'),
+      m('Auditee', 1, 'Report was technically reviewed by a second engineer; signature authority is administrative.', '2026-02-19T07:20:00Z', 'challenge'),
+      m('Auditor', 1, 'Maintained: review record shows second engineer checked formatting only; no technical review evidence.', '2026-02-19T12:00:00Z', 'maintain'),
+      m('Auditee', 2, 'Requesting reclassification to Observation; separation of duties procedure drafted.', '2026-02-21T06:05:00Z', 'challenge'),
+    ],
+    rca: emptyRca(), effectiveness: noEff, closedAt: '', escalation: noEsc,
+  },
+  {
+    id: 'AUD-004', auditId: 'AP-26-02', frameworkId: 'iso12207', clause: '6.4.4',
+    title: 'Design traceability gaps for zeroization requirements',
+    classification: 'Major NC',
+    evidence: 'Three safety-critical key-zeroization requirements (REQ-SEC-041, -044, -047) lack bidirectional trace links to design modules in the controlled ALM baseline B-3.0. Trace was held in an uncontrolled diagram file without baseline identifier.',
+    raisedAt: '2026-03-03T09:00:00Z', p1Status: 'Accepted', p1Iterations: 2,
+    p1History: [
+      m('Auditor', 0, 'Finding issued with ALM baseline export B-3.0.', '2026-03-03T09:00:00Z', 'issued'),
+      m('Auditee', 1, 'Traceability was maintained in the legacy architecture diagram.', '2026-03-04T05:40:00Z', 'challenge'),
+      m('Auditor', 1, 'Maintained: diagram file lacks version baseline IDs and is outside configuration control.', '2026-03-04T10:30:00Z', 'maintain'),
+      m('Auditee', 2, 'Major NC accepted; migrating links into ALM trace matrix.', '2026-03-05T06:00:00Z', 'accept'),
+    ],
+    rca: {
+      status: 'Rejected',
+      d1: 'Security architect, systems engineer, ALM administrator (sample roles)',
+      d2: { what: 'Three requirements unlinked in RTM', where: 'ALM baseline B-3.0', when: 'Since migration 2025-Q3', who: 'Systems engineering', why: 'Migration lacked link-check gate', how: 'Links not exported from diagram', howMany: '3 requirements' },
+      d3: 'Manually inspected three modules and verified implementation against requirements.',
+      whys: ['Requirements unlinked', 'Links lived in diagram, not ALM', 'Migration scripts ignored diagram links', 'No link-completeness gate', ''],
+      rootCause: 'Requirements migration lacked a link-completeness gate.',
+      escapePoint: 'Baseline review checked requirement count only.',
+      d5: 'Populated REQ to DES to CODE to TC links in ALM v3.1.',
+      d6: 'RTM export showing full linkage for the three requirements.',
+      d7: 'CI pre-merge check fails builds if any REQ-ID lacks design or test links.',
+      d8: 'Orphan-requirement check added to Definition of Done.',
+      p2Iterations: 2,
+      p2History: [
+        m('Auditee', 1, 'Submitted v1 RTM export showing complete link coverage.', '2026-03-16T06:00:00Z', 'submit'),
+        m('Auditor', 1, 'Rejected: linked test cases verify normal zeroization only, not tamper-triggered path.', '2026-03-18T09:00:00Z', 'reject'),
+        m('Auditee', 2, 'Submitted v2 with tamper test case TC-ZR-09 draft.', '2026-03-25T07:10:00Z', 'submit'),
+        m('Auditor', 2, 'Rejected: TC-ZR-09 not yet executed; D6 lacks execution record.', '2026-03-27T11:00:00Z', 'reject'),
+      ],
+      naReason: '',
+    },
+    effectiveness: noEff, closedAt: '', escalation: { active: true, reason: 'Two RCA rejections on safety-critical path; escalated to programme quality board.', at: '2026-03-27T12:00:00Z' },
+  },
+  {
+    id: 'AUD-005', auditId: 'AP-26-02', frameworkId: 'iso12207', clause: '6.4.9',
+    title: 'Verification coverage below contractual threshold',
+    classification: 'Minor NC',
+    evidence: 'Contract annex V-2 requires statement coverage of at least 85 percent for DAL-B modules. Coverage report for build 4.2.17 shows 78.4 percent for module nav_filter and 81.1 percent for module link_mgr, with no approved deviation.',
+    raisedAt: '2026-03-03T13:00:00Z', p1Status: 'Accepted', p1Iterations: 1,
+    p1History: [
+      m('Auditor', 0, 'Finding issued with coverage report build 4.2.17.', '2026-03-03T13:00:00Z', 'issued'),
+      m('Auditee', 1, 'Accepted. Coverage gap confirmed.', '2026-03-04T06:30:00Z', 'accept'),
+    ],
+    rca: {
+      status: 'Submitted',
+      d1: 'Verification lead, module owners nav_filter and link_mgr, QA',
+      d2: { what: 'Coverage below 85 percent', where: 'nav_filter, link_mgr', when: 'Build 4.2.17', who: 'Verification team', why: 'Threshold not enforced in pipeline', how: 'Report generated but not gated', howMany: '2 modules' },
+      d3: 'Release of build 4.2.17 to integration held; deviation request raised.',
+      whys: ['Coverage below threshold', 'Pipeline does not fail on low coverage', 'Threshold kept in contract annex only', 'No requirement flow-down into toolchain', 'Contract review checklist omits verification metrics'],
+      rootCause: 'Contractual verification thresholds not flowed down into build pipeline gates.',
+      escapePoint: 'Release readiness review relied on summary coverage across all modules.',
+      d5: 'Added per-module coverage gate at 85 percent for DAL-B modules; additional tests written.',
+      d6: 'Build 4.2.21 coverage: nav_filter 88.2 percent, link_mgr 86.9 percent (EV-0006).',
+      d7: 'Contract review checklist updated to flow verification metrics into pipeline configuration.',
+      d8: 'Lesson shared at engineering forum; module owners briefed.',
+      p2Iterations: 1,
+      p2History: [m('Auditee', 1, 'Submitted 8D v1 with build 4.2.21 coverage report.', '2026-03-20T06:40:00Z', 'submit')],
+      naReason: '',
+    },
+    effectiveness: noEff, closedAt: '', escalation: noEsc,
+  },
+  {
+    id: 'AUD-006', auditId: 'AP-26-02', frameworkId: 'iso12207', clause: '6.3.5',
+    title: 'Release binary does not match baseline',
+    classification: 'Major NC',
+    evidence: 'Digest of fielded binary ground-ctl 3.8.0 does not match the digest recorded in the configuration baseline CB-38. Binary was rebuilt locally after baseline approval with an updated compiler patch level.',
+    raisedAt: '2026-03-04T08:00:00Z', p1Status: 'Accepted', p1Iterations: 1,
+    p1History: [
+      m('Auditor', 0, 'Finding issued with digest comparison.', '2026-03-04T08:00:00Z', 'issued'),
+      m('Auditee', 1, 'Accepted. Local rebuild confirmed.', '2026-03-04T11:00:00Z', 'accept'),
+    ],
+    rca: {
+      status: 'Accepted',
+      d1: 'Configuration manager, release engineer, QA',
+      d2: { what: 'Binary digest mismatch', where: 'Release ground-ctl 3.8.0', when: 'After baseline CB-38 approval', who: 'Release engineering', why: 'Local rebuild permitted', how: 'Compiler patch applied locally', howMany: '1 release' },
+      d3: 'Recalled 3.8.0 from staging; re-released from controlled build server.',
+      whys: ['Digest mismatch', 'Binary rebuilt locally', 'Release process allowed manual build', 'Build server outage workaround undocumented', 'No digest verification at release'],
+      rootCause: 'Release process permitted uncontrolled local rebuilds.',
+      escapePoint: 'No digest comparison at release approval.',
+      d5: 'Releases only from controlled build server with signed provenance.',
+      d6: 'Ten consecutive releases verified with matching digests.',
+      d7: 'Release SOP updated; automated digest check at approval.',
+      d8: 'Lesson added to CM handbook.',
+      p2Iterations: 1,
+      p2History: [
+        m('Auditee', 1, 'Submitted 8D v1.', '2026-03-12T06:00:00Z', 'submit'),
+        m('Auditor', 1, 'Accepted v1.', '2026-03-13T09:00:00Z', 'accept'),
+      ],
+      naReason: '',
+    },
+    effectiveness: { verified: true, note: 'Ten subsequent release digests independently verified.', at: '2026-04-10T07:00:00Z' },
+    closedAt: '2026-04-12T10:00:00Z', escalation: noEsc,
+  },
+  {
+    id: 'AUD-007', auditId: 'AP-26-02', frameworkId: 'iso15504', clause: 'ENG.6 / SUP.8',
+    title: 'Code review performed after merge',
+    classification: 'Observation',
+    evidence: 'In 9 of 30 sampled merge requests on repository fire-ctl-core, review approval timestamp is later than merge timestamp. Branch protection permitted merge by maintainers without approval.',
+    raisedAt: '2026-03-05T10:00:00Z', p1Status: 'Accepted', p1Iterations: 2,
+    p1History: [
+      m('Auditor', 0, 'Finding issued as Minor NC.', '2026-03-05T10:00:00Z', 'issued'),
+      m('Auditee', 1, 'Post-merge reviews were for urgent fixes under documented hotfix procedure.', '2026-03-06T05:30:00Z', 'challenge'),
+      m('Auditor', 1, 'Reclassified Minor NC to Observation: 6 of 9 cases covered by hotfix procedure.', '2026-03-06T09:00:00Z', 'reclassify'),
+      m('Auditee', 2, 'Observation accepted.', '2026-03-06T12:00:00Z', 'accept'),
+    ],
+    rca: { ...emptyRca('Draft'), d1: 'Repository maintainers, process owner' },
+    effectiveness: noEff, closedAt: '', escalation: noEsc,
+  },
+];
+
+const fw = (id: string, code: string, name: string, kind: string, scheme: string, applicable: boolean, note: string, controls: [string, string][]) => ({
+  id, code, name, kind, scheme, applicable, note, custom: false,
+  controls: controls.map(([clause, title], i) => ({ id: `${id}-c${i}`, clause, title, custom: false })),
+});
+
+export function seedState(): State {
+  const t = '2026-02-10T08:00:00Z';
+  const ev = (id: string, title: string, findingId: string, type: string, version: string, uri: string, provenance: string, by: 'Auditor' | 'Auditee', at: string, reusedIn: string[] = [], supersedes = '') => ({
+    id, title, findingId, type, version, uri, provenance, submittedBy: by, at, supersedes, reusedIn,
+    digest: digest(id + title + version + uri),
+  });
+  return {
+    version: 1,
+    role: 'Auditor',
+    audits: [
+      {
+        id: 'AP-26-01', title: 'Signals Test Laboratory surveillance', scope: 'Electrical and RF test activities on HIL benches 1-3; records, metrology and impartiality controls.',
+        unit: 'Signals Test Laboratory (Demo Unit Alpha)', frameworkIds: ['iso17025', 'iso9001'], start: '2026-02-16', end: '2026-02-20',
+        lead: 'Auditor A. Kulkarni (sample)', auditeeRep: 'Lab Manager S. Bhide (sample)', status: 'Follow-up',
+        signoffs: {
+          impAuditor: { by: 'Auditor A. Kulkarni (sample)', at: '2026-02-20T10:00:00Z', digest: digest('imp-aud-01') },
+          impAuditee: { by: 'Lab Manager S. Bhide (sample)', at: '2026-02-20T10:30:00Z', digest: digest('imp-tee-01') },
+          confAuditor: null,
+          confAuditee: { by: 'Lab Manager S. Bhide (sample)', at: '2026-02-20T10:31:00Z', digest: digest('conf-tee-01') },
+        },
+      },
+      {
+        id: 'AP-26-02', title: 'Embedded software lifecycle process audit', scope: 'Fire-control and ground-control software: design definition, verification, configuration and review practices.',
+        unit: 'Software Engineering Cell (Demo Unit Bravo)', frameworkIds: ['iso12207', 'iso15504', 'iso9001'], start: '2026-03-02', end: '2026-03-06',
+        lead: 'Auditor R. Menon (sample)', auditeeRep: 'Programme Engineer D. Rao (sample)', status: 'Follow-up',
+        signoffs: {
+          impAuditor: { by: 'Auditor R. Menon (sample)', at: '2026-03-06T09:00:00Z', digest: digest('imp-aud-02') },
+          impAuditee: { by: 'Programme Engineer D. Rao (sample)', at: '2026-03-06T09:10:00Z', digest: digest('imp-tee-02') },
+          confAuditor: { by: 'Auditor R. Menon (sample)', at: '2026-03-06T09:01:00Z', digest: digest('conf-aud-02') },
+          confAuditee: { by: 'Programme Engineer D. Rao (sample)', at: '2026-03-06T09:11:00Z', digest: digest('conf-tee-02') },
+        },
+      },
+      {
+        id: 'AP-26-03', title: 'AI-assisted test analytics readiness review', scope: 'Pilot governance of a local anomaly-detection model used to triage test telemetry.',
+        unit: 'Signals Test Laboratory (Demo Unit Alpha)', frameworkIds: ['iso42001'], start: '2026-06-08', end: '2026-06-10',
+        lead: 'Auditor A. Kulkarni (sample)', auditeeRep: 'Data Lead P. Iyer (sample)', status: 'Planned',
+        signoffs: { impAuditor: null, impAuditee: null, confAuditor: null, confAuditee: null },
+      },
+    ],
+    findings,
+    evidence: [
+      ev('EV-0001', 'Test run #402 raw telemetry header', 'AUD-001', 'Test record', 'v1', 'lims://runs/402/header', 'Exported by LIMS on 2026-02-17 by auditor sample request', 'Auditor', '2026-02-17T09:30:00Z'),
+      ev('EV-0002', 'Calibration certificate CAL-2026-991', 'AUD-001', 'Certificate', 'v1', 'dms://metrology/CAL-2026-991.pdf', 'Issued by accredited calibration provider (sample)', 'Auditee', '2026-03-02T06:50:00Z'),
+      ev('EV-0003', 'Comparative waveform analysis, runs 397-402', 'AUD-001', 'Analysis', 'v2', 'dms://hil/analysis/wave-cmp-v2.xlsx', 'Prepared by HIL bench engineer; reviewed by metrology lead', 'Auditee', '2026-03-09T06:40:00Z', [], 'EV-0003 v1'),
+      ev('EV-0004', 'Telemetry sample list (12 files)', 'AUD-002', 'Sampling record', 'v1', 'dms://audit/AP-26-01/sample-tlm.csv', 'Auditor sampling worksheet', 'Auditor', '2026-02-17T12:00:00Z'),
+      ev('EV-0005', 'ALM RTM export B-3.1', 'AUD-004', 'Trace matrix', 'v2', 'alm://baselines/B-3.1/rtm', 'Exported by ALM administrator', 'Auditee', '2026-03-25T07:00:00Z'),
+      ev('EV-0006', 'Coverage report build 4.2.21', 'AUD-005', 'Tool report', 'v1', 'ci://pipelines/4.2.21/coverage', 'Generated by CI pipeline; signed provenance attestation', 'Auditee', '2026-03-20T06:30:00Z'),
+      ev('EV-0007', 'Release digest verification log', 'AUD-006', 'Log', 'v1', 'ci://release/digest-log', 'Release server log extract', 'Auditee', '2026-04-10T06:00:00Z', ['AUD-004']),
+    ],
+    frameworks: [
+      fw('iso17025', 'ISO/IEC 17025', 'General requirements for the competence of testing and calibration laboratories', 'Accreditation (NABL)', 'Laboratory accreditation via NABL; assessor-led, scope-specific', true, 'Primary basis for test laboratory accreditation scope.', [['4.1', 'Impartiality'], ['4.2', 'Confidentiality'], ['6.4', 'Equipment'], ['6.5', 'Metrological traceability'], ['7.5', 'Technical records'], ['8.7', 'Corrective actions']]),
+      fw('iso9001', 'ISO 9001', 'Quality management systems requirements', 'Certification', 'Management system certification by accredited certification body', true, 'Organisation-level QMS backbone.', [['7.5', 'Documented information'], ['9.2', 'Internal audit'], ['10.2', 'Nonconformity and corrective action']]),
+      fw('iso17065', 'ISO/IEC 17065', 'Requirements for bodies certifying products, processes and services', 'Conformity body requirement', 'Applies to product certification bodies, not to the auditee', false, 'Reference only unless unit operates a product certification scheme.', [['4.2', 'Management of impartiality'], ['7.4', 'Evaluation']]),
+      fw('iso17021', 'ISO/IEC 17021-1', 'Requirements for bodies providing audit and certification of management systems', 'Conformity body requirement', 'Applies to certification bodies', false, 'Useful for auditor competence and impartiality models.', [['5.2', 'Management of impartiality'], ['9.4', 'Conducting audits']]),
+      fw('iso17020', 'ISO/IEC 17020', 'Requirements for the operation of bodies performing inspection', 'Inspection body (NABCB)', 'Inspection body accreditation', false, 'Consider if unit performs acceptance inspection.', [['4.1', 'Impartiality and independence'], ['7.1', 'Inspection methods']]),
+      fw('iso42001', 'ISO/IEC 42001', 'Artificial intelligence management system', 'Certification', 'AI management system certification', true, 'Applies to governance of optional local AI assistance.', [['6.1.4', 'AI system impact assessment'], ['8.4', 'AI system impact assessment operation'], ['9.1', 'Monitoring and measurement']]),
+      fw('iso12207', 'ISO/IEC/IEEE 12207', 'Software life cycle processes', 'Process reference', 'Contractual or self-declared process conformance', true, 'Software lifecycle reference for programmes.', [['6.3.5', 'Configuration management'], ['6.4.4', 'Design definition'], ['6.4.9', 'Verification']]),
+      fw('iso15504', 'ISO/IEC 15504 (SPICE)', 'Process assessment (legacy)', 'Process assessment (legacy)', 'Legacy; migration to ISO/IEC 330xx family subject to scope', true, 'Retained for legacy assessments; plan migration to 33020/33061 where applicable.', [['ENG.6', 'Software construction'], ['SUP.8', 'Configuration management'], ['MAN.5', 'Risk management']]),
+    ],
+    shared: [
+      { id: 'SC-01', title: 'Impartiality risk identification and review', owner: 'Quality manager', mappings: [{ frameworkId: 'iso17025', clause: '4.1' }, { frameworkId: 'iso17020', clause: '4.1' }, { frameworkId: 'iso17065', clause: '4.2' }] },
+      { id: 'SC-02', title: 'Controlled records with integrity protection', owner: 'Records officer', mappings: [{ frameworkId: 'iso17025', clause: '7.5' }, { frameworkId: 'iso9001', clause: '7.5' }] },
+      { id: 'SC-03', title: 'Nonconformity and corrective action process', owner: 'Quality manager', mappings: [{ frameworkId: 'iso17025', clause: '8.7' }, { frameworkId: 'iso9001', clause: '10.2' }] },
+      { id: 'SC-04', title: 'Configuration baseline and release integrity', owner: 'Configuration manager', mappings: [{ frameworkId: 'iso12207', clause: '6.3.5' }, { frameworkId: 'iso15504', clause: 'SUP.8' }] },
+    ],
+    settings: {
+      orgName: 'Kavach Demonstration Organisation', unitName: 'Demo Unit Alpha', programme: 'Pilot programme P-1',
+      auditorName: 'Auditor A. Kulkarni (sample)', auditeeName: 'Lab Manager S. Bhide (sample)',
+      highThreshold: 4, moderateThreshold: 3, retentionYears: 10, findingPrefix: 'AUD',
+      impartialityText: 'I affirm that my participation in this audit, the finding exchanges and the RCA evaluations has been free from commercial, financial or command influence, and that any known conflict of interest has been declared.',
+      confidentialityText: 'I affirm that source code, calibration records, telemetry and nonconformity artefacts exchanged during this audit will be handled only within approved repositories and on a need-to-know basis.',
+      reportFooter: 'Demonstration dossier. Sample data. Not for classified information. Clause mappings require validation against licensed standard editions.',
+    },
+    log: [{ seq: 1, at: t, role: 'Auditor', action: 'Workspace seeded with adapted sample data', ref: 'SYSTEM', prev: '0'.repeat(16), digest: digest('seed') }],
+  };
+}
