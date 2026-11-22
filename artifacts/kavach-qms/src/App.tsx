@@ -19,6 +19,7 @@ import Architecture from '@/pages/architecture';
 import SettingsPage from '@/pages/settings';
 import Landing from '@/pages/landing';
 import Login from '@/pages/login';
+import KnowledgeRepo from '@/pages/knowledge-repo';
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,8 @@ function AppRoutes() {
           <Route path="/frameworks" component={Frameworks} />
           <Route path="/governance" component={Governance} />
           <Route path="/architecture" component={Architecture} />
+          <Route path="/knowledge-repo" component={KnowledgeRepo} />
+          <Route path="/framework-map" component={KnowledgeRepo} />
           <Route path="/settings" component={SettingsPage} />
           <Route component={NotFound} />
         </Switch>

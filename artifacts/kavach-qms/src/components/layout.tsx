@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
-import { LayoutGrid, CalendarRange, FileWarning, Wrench, Paperclip, Layers, ShieldCheck, Network, Settings2, Menu, X, Download, FileJson, ArrowLeft } from 'lucide-react';
+import { LayoutGrid, CalendarRange, FileWarning, Wrench, Paperclip, Layers, ShieldCheck, Network, Settings2, BookMarked, Menu, X, Download, FileJson, ArrowLeft } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { exportCsv, exportJson } from '@/lib/export';
 import { cn } from '@/lib/utils';
@@ -13,6 +13,7 @@ const NAV = [
   { href: '/corrective-actions', label: 'Corrective actions', icon: Wrench, n: '03' },
   { href: '/evidence', label: 'Evidence register', icon: Paperclip, n: '04' },
   { href: '/frameworks', label: 'Frameworks', icon: Layers, n: '05' },
+  { href: '/knowledge-repo', label: 'Knowledge repo', icon: BookMarked, n: '5a' },
   { href: '/governance', label: 'Governance gate', icon: ShieldCheck, n: '06' },
   { href: '/architecture', label: 'Architecture', icon: Network, n: '07' },
   { href: '/settings', label: 'Settings', icon: Settings2, n: '08' },
