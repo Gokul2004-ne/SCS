@@ -30,4 +30,10 @@ Use Gmail for audit-request email intake.
 
 **Why:** The user explicitly selected Gmail on 2026-11-22.
 
-**How to apply:** Use the Gmail API integration for email-to-ticket automation. Confirm the intake label/folder and start date before processing historical mail; connecting the provider alone does not authorise bulk historical import or test emails to real recipients.
+**How to apply:** The user declined the connection and instructed continuing without integration. Keep email automation disconnected until separately authorised. If enabled later, use Gmail and confirm the intake label/folder and start date before processing historical mail; connecting the provider alone does not authorise bulk historical import or test emails to real recipients.
+
+Confirmed choices override conflicting instructions in the nine-prompt Auditor 365 attachment.
+
+**Why:** On 2026-11-22 the user selected "Keep confirmed choices" after the conflicts were explained.
+
+**How to apply:** Preserve Clerk rather than migrating to Replit Auth; keep auditees view-and-own-declaration-signing only rather than enabling rebuttal submissions; do not introduce SendGrid or Mailgun. Apply the attachment's remaining product and visual requirements, but never let persona selection grant privileged roles. Describe SHA-256 attestations as integrity records, not certificate-backed digital signatures.
