@@ -24,4 +24,10 @@ The user's latest persona rule is auditor control of audit functionality and aud
 
 **Why:** The user explicitly narrowed the earlier collaborative auditee role while requesting a demonstrable Auditor 365 / Auditor AI Twin workflow.
 
-**How to apply:** Apply organisation-scoped server RBAC, not a client persona toggle. Resolve the conflict between read-only auditee access and earlier auditee declarations/rebuttals explicitly; do not grant exceptions or impersonate signers silently.
+**How to apply:** Apply organisation-scoped server RBAC, not a client persona toggle. On 2026-11-22 the user confirmed that auditees can view assigned current audit progress and sign their own declarations only. They cannot edit audit records, submit rebuttals, score clauses or author dependencies. Never let auditors impersonate auditee signers.
+
+Use Gmail for audit-request email intake.
+
+**Why:** The user explicitly selected Gmail on 2026-11-22.
+
+**How to apply:** Use the Gmail API integration for email-to-ticket automation. Confirm the intake label/folder and start date before processing historical mail; connecting the provider alone does not authorise bulk historical import or test emails to real recipients.
