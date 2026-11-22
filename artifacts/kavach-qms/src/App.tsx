@@ -17,15 +17,27 @@ import Frameworks from '@/pages/frameworks';
 import Governance from '@/pages/governance';
 import Architecture from '@/pages/architecture';
 import SettingsPage from '@/pages/settings';
+import Landing from '@/pages/landing';
+import Login from '@/pages/login';
 
 const queryClient = new QueryClient();
 
 function Router() {
   return (
+    <Switch>
+      <Route path="/" component={Landing} />
+      <Route path="/login" component={Login} />
+      <Route component={AppRoutes} />
+    </Switch>
+  );
+}
+
+function AppRoutes() {
+  return (
     <Shell>
       <RoutedErrorBoundary>
         <Switch>
-          <Route path="/" component={Overview} />
+          <Route path="/dashboard" component={Overview} />
           <Route path="/audits" component={Audits} />
           <Route path="/findings" component={Findings} />
           <Route path="/findings/:id" component={FindingDetail} />

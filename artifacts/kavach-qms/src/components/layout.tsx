@@ -1,13 +1,13 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
-import { LayoutGrid, CalendarRange, FileWarning, Wrench, Paperclip, Layers, ShieldCheck, Network, Settings2, Menu, X, Download, FileJson } from 'lucide-react';
+import { LayoutGrid, CalendarRange, FileWarning, Wrench, Paperclip, Layers, ShieldCheck, Network, Settings2, Menu, X, Download, FileJson, ArrowLeft } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { exportCsv, exportJson } from '@/lib/export';
 import { cn } from '@/lib/utils';
 import type { Role } from '@/lib/types';
 
 const NAV = [
-  { href: '/', label: 'Overview', icon: LayoutGrid, n: '00' },
+  { href: '/dashboard', label: 'Overview', icon: LayoutGrid, n: '00' },
   { href: '/audits', label: 'Audit programme', icon: CalendarRange, n: '01' },
   { href: '/findings', label: 'Findings register', icon: FileWarning, n: '02' },
   { href: '/corrective-actions', label: 'Corrective actions', icon: Wrench, n: '03' },
@@ -99,6 +99,9 @@ export function Shell({ children }: { children: ReactNode }) {
         <button data-testid="button-export-json-side" onClick={() => exportJson(state)} className="flex w-full items-center gap-2 rounded-[5px] px-2.5 py-1.5 text-[12px] text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
           <FileJson className="h-3.5 w-3.5" /> Full JSON dossier
         </button>
+        <Link href="/" data-testid="link-return-landing" className="flex w-full items-center gap-2 rounded-[5px] px-2.5 py-1.5 text-[11.5px] text-sidebar-foreground/55 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+          <ArrowLeft className="h-3.5 w-3.5" /> Auditor 365 home
+        </Link>
         <p className="px-2.5 pt-2 text-[10.5px] leading-snug text-sidebar-foreground/40">Prototype blueprint. Not a certified production system. No official endorsement.</p>
       </div>
     </div>

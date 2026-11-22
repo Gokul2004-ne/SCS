@@ -1,0 +1,66 @@
+/* Scoped stylesheet for public Auditor 365 pages. Everything lives under .a365 */
+.a365 {
+  --navy: #0F172A; --navy-2: #16213A; --navy-3: #1E2B47; --line: rgba(226, 232, 240, .12);
+  --amber: #F59E0B; --amber-soft: rgba(245, 158, 11, .14); --ink: #EEF0F4; --mute: #9AA6BC; --paper: #F6F1E7;
+  min-height: 100dvh; background: var(--navy); color: var(--ink);
+  font-family: 'IBM Plex Sans', system-ui, sans-serif; position: relative; overflow-x: hidden;
+}
+.a365 *:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 4px; }
+.a365 .serif { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; }
+.a365 .mono { font-family: 'JetBrains Mono', monospace; }
+.a365 .grid-bg { position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 64px 64px; mask-image: radial-gradient(ellipse 80% 70% at 60% 40%, #000 30%, transparent 80%); opacity: .5; }
+.a365 .halo { position: absolute; width: 900px; height: 900px; right: -260px; top: -200px; pointer-events: none;
+  background: radial-gradient(circle, rgba(245,158,11,.13), transparent 60%); }
+.a365 .hatch-bar { height: 4px; background-image: repeating-linear-gradient(135deg, var(--amber) 0 10px, var(--navy) 10px 20px); }
+.a365 .nav { position: relative; z-index: 5; display: flex; align-items: center; justify-content: space-between; padding: 20px clamp(20px, 5vw, 64px); }
+.a365 .brand { display: flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; }
+.a365 .kicker { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--amber); }
+.a365 .btn-amber { display: inline-flex; align-items: center; gap: 10px; background: var(--amber); color: var(--navy); font-weight: 600;
+  padding: 14px 22px; border-radius: 6px; text-decoration: none; transition: transform .2s cubic-bezier(.2,.7,.2,1), background .2s; }
+.a365 .btn-amber:hover { transform: translateY(-2px); background: #FBBF24; }
+.a365 .btn-ghost { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); color: var(--ink); padding: 13px 20px; border-radius: 6px; text-decoration: none; transition: border-color .2s, background .2s; }
+.a365 .btn-ghost:hover { border-color: rgba(245,158,11,.6); background: var(--amber-soft); }
+.a365 .rv { opacity: 0; transform: translateY(14px); animation: a365rise .8s cubic-bezier(.2,.7,.2,1) forwards; }
+.a365 .d1 { animation-delay: .08s } .a365 .d2 { animation-delay: .18s } .a365 .d3 { animation-delay: .3s } .a365 .d4 { animation-delay: .44s } .a365 .d5 { animation-delay: .6s }
+@keyframes a365rise { to { opacity: 1; transform: none; } }
+.a365 .scroll-rv { opacity: 0; transform: translateY(24px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+.a365 .scroll-rv.in { opacity: 1; transform: none; }
+
+/* lifecycle */
+.a365 .lc-node { cursor: pointer; }
+.a365 .lc-node circle.ring { transition: r .5s cubic-bezier(.2,.7,.2,1), fill .4s, stroke .4s; }
+.a365 .lc-node:hover circle.ring { stroke: var(--amber); }
+.a365 .lc-pulse { transform-box: fill-box; transform-origin: center; animation: a365pulse 2.5s ease-out infinite; }
+@keyframes a365pulse { 0% { transform: scale(1); opacity: .7 } 100% { transform: scale(2.1); opacity: 0 } }
+.a365 .lc-sweep { transform-origin: 250px 250px; animation: a365spin 40s linear infinite; }
+@keyframes a365spin { to { transform: rotate(360deg) } }
+.a365 .lc-arc { transition: stroke-dashoffset .9s cubic-bezier(.2,.7,.2,1); }
+.a365 .lc-detail { animation: a365fade .5s cubic-bezier(.2,.7,.2,1); }
+@keyframes a365fade { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+.a365 .chip { border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 12px; color: var(--mute); background: transparent; cursor: pointer; transition: all .2s; }
+.a365 .chip[aria-current='step'] { border-color: var(--amber); color: var(--navy); background: var(--amber); }
+.a365 .chip:hover { color: var(--ink); border-color: rgba(245,158,11,.5); }
+.a365 .chip[aria-current='step']:hover { color: var(--navy); }
+
+/* paper section */
+.a365 .paper { background: var(--paper); color: var(--navy); }
+.a365 .paper .mute { color: #55607A; }
+.a365 .card-line { border-top: 1px solid rgba(15,23,42,.18); }
+
+/* persona */
+.a365 .persona { text-align: left; border: 1px solid var(--line); background: rgba(22,33,58,.6); border-radius: 10px; padding: 26px; cursor: pointer;
+  transition: border-color .25s, transform .25s cubic-bezier(.2,.7,.2,1), background .25s; position: relative; overflow: hidden; color: var(--ink); width: 100%; }
+.a365 .persona:hover { transform: translateY(-3px); border-color: rgba(245,158,11,.45); }
+.a365 .persona[aria-checked='true'] { border-color: var(--amber); background: linear-gradient(160deg, rgba(245,158,11,.14), rgba(22,33,58,.8) 60%); }
+.a365 .persona .tick { position: absolute; top: 18px; right: 18px; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--line); display: grid; place-items: center; transition: all .25s; }
+.a365 .persona[aria-checked='true'] .tick { background: var(--amber); border-color: var(--amber); color: var(--navy); }
+.a365 .btn-disabled { width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; padding: 14px; border-radius: 6px;
+  border: 1px dashed rgba(154,166,188,.4); background: rgba(154,166,188,.06); color: var(--mute); cursor: not-allowed; font-weight: 500; }
+
+@media (prefers-reduced-motion: reduce) {
+  .a365 .rv, .a365 .scroll-rv { animation: none; opacity: 1; transform: none; transition: none; }
+  .a365 .lc-pulse, .a365 .lc-sweep { animation: none; }
+  .a365 .lc-arc, .a365 .lc-detail { transition: none; animation: none; }
+}
