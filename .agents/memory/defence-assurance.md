@@ -26,6 +26,12 @@ The user's latest persona rule is auditor control of audit functionality and aud
 
 **How to apply:** Apply organisation-scoped server RBAC, not a client persona toggle. On 2026-11-22 the user confirmed that auditees can view assigned current audit progress and sign their own declarations only. They cannot edit audit records, submit rebuttals, score clauses or author dependencies. Never let auditors impersonate auditee signers.
 
+Auditee navigation is restricted to Overview, Audit Programme, Findings Register and Governance Gate, with records scoped to the authenticated user's auditee-representative assignments. The public landing retains only the hero, with distinct Auditor and Auditee login entry pages and no common top-right login.
+
+**Why:** The user explicitly requested this access boundary and confirmed the hero-only landing on 2026-11-23.
+
+**How to apply:** These requirements supersede earlier multi-section landing instructions. Enforce assignment restrictions on data and exports, not just navigation visibility; persona entry pages never grant roles.
+
 Use Gmail for audit-request email intake.
 
 **Why:** The user explicitly selected Gmail on 2026-11-22.
