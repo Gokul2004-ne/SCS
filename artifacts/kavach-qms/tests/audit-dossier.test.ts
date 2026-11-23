@@ -6,6 +6,8 @@ import { generateAuditFile } from '../src/lib/audit-download';
 import { demoVisibleState, demoMutationAllowed, demoRouteAllowed } from '../src/lib/demo-access';
 import ExcelJS from 'exceljs';
 import { writeFile, mkdir } from 'node:fs/promises';
+import path from 'node:path';
+import os from 'node:os';
 
 describe('Per-audit dossiers', () => {
   it('includes all recorded rounds and excludes unrelated audits and logs', () => {
@@ -29,16 +31,17 @@ describe('Per-audit dossiers', () => {
     const state = seedState();
     const dossier = buildAuditDossier(state, state.audits[0].id);
     dossier.sections[0].rows.push(['Untrusted text', '=HYPERLINK("https://example.com")']);
-    await mkdir('/tmp/auditor365-export-check', { recursive: true });
+    const testTmpDir = path.join(os.tmpdir(), 'auditor365-export-check');
+    await mkdir(testTmpDir, { recursive: true });
     for (const format of ['pdf', 'xlsx', 'docx'] as const) {
       const blob = await generateAuditFile(dossier, format);
       const bytes = Buffer.from(await blob.arrayBuffer());
       expect(bytes.byteLength).toBeGreaterThan(1000);
       expect(bytes.subarray(0, format === 'pdf' ? 4 : 2).toString()).toBe(format === 'pdf' ? '%PDF' : 'PK');
-      await writeFile(`/tmp/auditor365-export-check/audit.${format}`, bytes);
+      await writeFile(path.join(testTmpDir, `audit.${format}`), bytes);
       if (format === 'xlsx') {
         const book = new ExcelJS.Workbook();
-        await book.xlsx.load(bytes);
+        await book.xlsx.load(bytes as any);
         const sheet = book.getWorksheet('Export notes')!;
         expect(sheet.lastRow!.getCell(2).type).toBe(ExcelJS.ValueType.String);
         expect(sheet.lastRow!.getCell(2).value).toBe('=HYPERLINK("https://example.com")');

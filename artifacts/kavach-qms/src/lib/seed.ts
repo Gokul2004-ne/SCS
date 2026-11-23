@@ -1,5 +1,6 @@
 import type { Finding, Rca, State, Msg, Role } from './types';
 import { digest } from './digest';
+import { getFacilityForUnit, createGeoDigest, generateSampleAuditorPhoto } from './geo';
 
 const m = (role: Role, round: number, text: string, at: string, kind = 'comment'): Msg => ({ role, round, text, at, kind });
 
@@ -220,6 +221,27 @@ export function seedState(): State {
           confAuditor: null,
           confAuditee: { by: 'Lab Manager S. Bhide (sample)', at: '2026-02-20T10:31:00Z', digest: digest('conf-tee-01') },
         },
+        geoTracking: {
+          status: 'Active',
+          facility: getFacilityForUnit('Signals Test Laboratory (Demo Unit Alpha)'),
+          startRecord: {
+            photo: generateSampleAuditorPhoto('Auditor A. Kulkarni (sample)', 'AP-26-01', 13.03582, 77.59704, '2026-02-16T09:00:00Z'),
+            lat: 13.03582,
+            lng: 77.59704,
+            accuracy: 4.2,
+            timestamp: '2026-02-16T09:00:00Z',
+            auditor: 'Auditor A. Kulkarni (sample)',
+            facilityName: 'Signals Test Laboratory (Demo Unit Alpha)',
+            distanceMeters: 14,
+            withinGeofence: true,
+            digest: createGeoDigest('AP-26-01', 'Auditor A. Kulkarni (sample)', '2026-02-16T09:00:00Z', 13.03582, 77.59704, 'init-01'),
+          },
+          pings: [
+            { lat: 13.03582, lng: 77.59704, timestamp: '2026-02-16T09:00:00Z', withinGeofence: true, distanceMeters: 14, note: 'Fieldwork initialization' },
+            { lat: 13.03590, lng: 77.59710, timestamp: '2026-02-18T11:00:00Z', withinGeofence: true, distanceMeters: 22, note: 'HIL Bench inspection' },
+          ],
+          clausesUnlocked: true,
+        },
       },
       {
         id: 'AP-26-02', title: 'Embedded software lifecycle process audit', scope: 'Fire-control and ground-control software: design definition, verification, configuration and review practices.',
@@ -231,12 +253,38 @@ export function seedState(): State {
           confAuditor: { by: 'Auditor R. Menon (sample)', at: '2026-03-06T09:01:00Z', digest: digest('conf-aud-02') },
           confAuditee: { by: 'Programme Engineer D. Rao (sample)', at: '2026-03-06T09:11:00Z', digest: digest('conf-tee-02') },
         },
+        geoTracking: {
+          status: 'Active',
+          facility: getFacilityForUnit('Software Engineering Cell (Demo Unit Bravo)'),
+          startRecord: {
+            photo: generateSampleAuditorPhoto('Auditor R. Menon (sample)', 'AP-26-02', 17.44351, 78.37724, '2026-03-02T09:00:00Z'),
+            lat: 17.44351,
+            lng: 78.37724,
+            accuracy: 3.8,
+            timestamp: '2026-03-02T09:00:00Z',
+            auditor: 'Auditor R. Menon (sample)',
+            facilityName: 'Software Engineering Cell (Demo Unit Bravo)',
+            distanceMeters: 18,
+            withinGeofence: true,
+            digest: createGeoDigest('AP-26-02', 'Auditor R. Menon (sample)', '2026-03-02T09:00:00Z', 17.44351, 78.37724, 'init-02'),
+          },
+          pings: [
+            { lat: 17.44351, lng: 78.37724, timestamp: '2026-03-02T09:00:00Z', withinGeofence: true, distanceMeters: 18, note: 'Fieldwork initialization' },
+          ],
+          clausesUnlocked: true,
+        },
       },
       {
         id: 'AP-26-03', title: 'AI-assisted test analytics readiness review', scope: 'Pilot governance of a local anomaly-detection model used to triage test telemetry.',
         unit: 'Signals Test Laboratory (Demo Unit Alpha)', frameworkIds: ['iso42001'], start: '2026-06-08', end: '2026-06-10',
         lead: 'Auditor A. Kulkarni (sample)', auditeeRep: 'Data Lead P. Iyer (sample)', status: 'Planned',
         signoffs: { impAuditor: null, impAuditee: null, confAuditor: null, confAuditee: null },
+        geoTracking: {
+          status: 'Not Initialized',
+          facility: getFacilityForUnit('Signals Test Laboratory (Demo Unit Alpha)'),
+          pings: [],
+          clausesUnlocked: false,
+        },
       },
     ],
     findings,

@@ -55,6 +55,43 @@ export interface Signoff {
 
 export type SignKey = 'impAuditor' | 'impAuditee' | 'confAuditor' | 'confAuditee';
 
+export interface GeoRecord {
+  photo: string;
+  lat: number;
+  lng: number;
+  accuracy: number;
+  timestamp: string;
+  auditor: string;
+  facilityName: string;
+  distanceMeters: number;
+  withinGeofence: boolean;
+  digest: string;
+}
+
+export interface GeoPing {
+  lat: number;
+  lng: number;
+  timestamp: string;
+  withinGeofence: boolean;
+  distanceMeters: number;
+  note?: string;
+}
+
+export interface AuditGeoTracking {
+  status: 'Not Initialized' | 'Active' | 'Completed' | 'Geofence Breached';
+  facility: {
+    name: string;
+    lat: number;
+    lng: number;
+    radiusMeters: number;
+    locationDesc?: string;
+  };
+  startRecord?: GeoRecord;
+  endRecord?: GeoRecord;
+  pings: GeoPing[];
+  clausesUnlocked: boolean;
+}
+
 export interface Audit {
   id: string;
   title: string;
@@ -67,6 +104,7 @@ export interface Audit {
   auditeeRep: string;
   status: AuditStatus;
   signoffs: Record<SignKey, Signoff | null>;
+  geoTracking?: AuditGeoTracking;
 }
 
 export interface Evidence {

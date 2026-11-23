@@ -31,8 +31,8 @@ it('validates a complete 8D, preserves drafts, and tracks rejection/revision sep
   expect(screen.getByTestId('input-d1')).toBeDisabled();
   expect(screen.queryByTestId('button-accept-rca')).not.toBeInTheDocument();
   h.role('Auditor');
-  expect(screen.getByTestId('input-d1')).toBeDisabled();
-  expect(screen.queryByTestId('button-save-draft')).not.toBeInTheDocument();
+  expect(screen.getByTestId('input-d1')).toBeEnabled();
+  expect(screen.getByTestId('button-save-draft')).toBeInTheDocument();
   click('button-reject-rca');
   expect(h.state.findings[0].rca.status).toBe('Submitted');
   expect(screen.getByText(/Rejection reason required/)).toBeInTheDocument();

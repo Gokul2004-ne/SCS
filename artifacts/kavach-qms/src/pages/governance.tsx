@@ -77,7 +77,7 @@ export default function Governance() {
                             <Pill t="teal"><Check className="h-3 w-3" /> Signed</Pill>
                             <div className="text-[11px] text-muted-foreground">{fmt(s.at)}</div>
                             <div className="font-mono text-[10.5px] text-muted-foreground">sim:{s.digest}</div>
-                            {mine && role === 'Auditor' && <Btn variant="ghost" className="!px-1.5" onClick={() => revoke(k.key)} data-testid={`button-revoke-${k.key}`}><Undo2 className="h-3 w-3" /> Revoke</Btn>}
+                            {mine && <Btn variant="ghost" className="!px-1.5" onClick={() => revoke(k.key)} data-testid={`button-revoke-${k.key}`}><Undo2 className="h-3 w-3" /> Revoke</Btn>}
                           </div>
                         ) : (
                           <div className="mt-2">

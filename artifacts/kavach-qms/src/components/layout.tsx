@@ -30,22 +30,16 @@ function Mark() {
   );
 }
 
-function RoleSwitch() {
-  const { role, setRole } = useStore();
+function RoleDisplay() {
+  const { role } = useStore();
   return (
     <div className="flex items-center gap-2">
       <span className="hidden text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground lg:inline">Simulated role</span>
-      <div className="relative flex rounded-[5px] border border-input bg-muted p-0.5" data-testid="role-switch">
-        {(['Auditor', 'Auditee'] as Role[]).map((r) => (
-          <button
-            key={r}
-            data-testid={`button-role-${r.toLowerCase()}`}
-            onClick={() => setRole(r)}
-            className={cn('relative z-10 rounded-[4px] px-3 py-1 text-[12px] font-semibold transition-colors', role === r ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
-          >
-            {r === 'Auditor' ? 'Lead auditor' : 'Auditee lead'}
-          </button>
-        ))}
+      <div
+        data-testid="role-display"
+        className="rounded-[4px] bg-primary px-3 py-1 text-[12px] font-semibold text-primary-foreground shadow-sm"
+      >
+        {role === 'Auditor' ? 'Lead auditor' : 'Auditee lead'}
       </div>
     </div>
   );
@@ -131,9 +125,9 @@ export function Shell({ children }: { children: ReactNode }) {
               {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
             <div className="hidden text-[11.5px] text-muted-foreground md:block">
-              Role switching is a simulation of perspective, <span className="font-semibold text-foreground">not authorisation</span>.
+              Role view is a simulation of perspective, <span className="font-semibold text-foreground">not authorisation</span>.
             </div>
-            <RoleSwitch />
+            <RoleDisplay />
           </div>
         </div>
         <main className="mx-auto max-w-[1400px] px-4 py-6 lg:px-8">
@@ -143,12 +137,12 @@ export function Shell({ children }: { children: ReactNode }) {
           {!demoRouteAllowed(state.role, loc) ? (
             <div className="rounded border border-border bg-card p-6">
               <h1 className="text-xl font-semibold">Auditor workspace only</h1>
-              <p className="my-3 text-sm">Auditees can view Overview, Audit programme, Findings register and Governance gate.</p>
+              <p className="my-3 text-sm">Auditees can view Overview, Audit programme, Findings register, Corrective actions and Governance gate.</p>
               <Link href="/dashboard" className="underline">Return to Overview</Link>
             </div>
-          ) : state.role === 'Auditee' && loc.startsWith('/findings/') ? (
-            <><p className="mb-3 text-xs text-muted-foreground">Read-only finding details. Auditee declarations are signed in Governance gate.</p><fieldset disabled className="min-w-0">{children}</fieldset></>
-          ) : <div key={state.role}>{children}</div>}
+          ) : (
+            <div key={state.role}>{children}</div>
+          )}
         </main>
       </div>
     </div>

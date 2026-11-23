@@ -46,7 +46,7 @@ export default function CorrectiveActions() {
   }, [f]);
 
   const locked = !f || f.p1Status !== 'Accepted';
-  const editable = !!f && !locked && role === 'Auditee' && (f.rca.status === 'Draft' || f.rca.status === 'Rejected') && !f.closedAt;
+  const editable = !!f && !locked && !f.closedAt && (role === 'Auditor' || f.rca.status !== 'Submitted');
   const set = (patch: Partial<Rca>) => draft && setDraft({ ...draft, ...patch });
 
   const missing = (r: Rca) => {
@@ -76,11 +76,13 @@ export default function CorrectiveActions() {
       if (submit) {
         x.rca.p2Iterations += 1;
         x.rca.p2History.push({ role: 'Auditee', round: x.rca.p2Iterations, text: note.trim() || `Submitted 8D v${x.rca.p2Iterations}.`, at: nowIso(), kind: 'submit' });
+      } else if (note.trim()) {
+        x.rca.p2History.push({ role, round: x.rca.p2Iterations, text: note.trim(), at: nowIso(), kind: 'save' });
       }
     });
     setErr('');
     setNote('');
-    toast({ title: submit ? '8D submitted to auditor' : 'Draft saved', description: f.id });
+    toast({ title: submit ? '8D submitted to auditor' : role === 'Auditor' ? '8D changes saved' : 'Draft saved', description: f.id });
   };
 
   const dispose = (kind: 'accept' | 'reject' | 'na') => {
@@ -88,6 +90,10 @@ export default function CorrectiveActions() {
     if (kind !== 'accept' && note.trim().length < 10) return setErr(kind === 'reject' ? 'Rejection reason required (10+ characters).' : 'NA justification required (10+ characters).');
     mutate(kind === 'accept' ? '8D accepted' : kind === 'reject' ? '8D rejected, returned for revision' : '8D marked not applicable', f.id, (d) => {
       const x = d.findings.find((y) => y.id === f.id)!;
+      if (draft) {
+        const keep = { p2Iterations: x.rca.p2Iterations, p2History: x.rca.p2History };
+        x.rca = { ...draft, ...keep, status: x.rca.status };
+      }
       x.rca.status = kind === 'accept' ? 'Accepted' : kind === 'reject' ? 'Rejected' : 'Not Applicable';
       if (kind === 'na') x.rca.naReason = note.trim();
       x.rca.p2History.push({ role: 'Auditor', round: x.rca.p2Iterations, text: note.trim() || 'Accepted.', at: nowIso(), kind: kind === 'na' ? 'not applicable' : kind });
@@ -150,7 +156,15 @@ export default function CorrectiveActions() {
               </div>
               <div className="border-t border-border bg-muted/40 px-4 py-2 text-[12px]">
                 Status <span className="font-semibold">{f.rca.status}</span>
-                {editable ? ' / you may edit as auditee.' : role === 'Auditor' ? ' / read-only for auditor; disposition below.' : f.rca.status === 'Submitted' ? ' / awaiting auditor disposition.' : ' / read-only.'}
+                {f.closedAt
+                  ? ' / closed finding (read-only).'
+                  : role === 'Auditor'
+                  ? ' / you may edit content and record disposition as auditor.'
+                  : editable
+                  ? ' / you may edit as auditee.'
+                  : f.rca.status === 'Submitted'
+                  ? ' / awaiting auditor disposition.'
+                  : ' / read-only.'}
               </div>
             </Panel>
 
@@ -191,23 +205,52 @@ export default function CorrectiveActions() {
             <div className="grid gap-5 xl:grid-cols-[1fr_340px]">
               <Panel title="8D exchange history" kicker="Separate from phase-1 counter">
                 <Thread items={f.rca.p2History} empty="No 8D submissions yet." />
-                {(editable || (role === 'Auditor' && ['Submitted', 'Draft', 'Rejected'].includes(f.rca.status) && !f.closedAt)) && (
+                {!f.closedAt && (
                   <div className="space-y-3 border-t border-border bg-muted/30 p-4">
-                    <Field label={role === 'Auditee' ? 'Submission note (optional)' : 'Disposition reason'} error={err}>
-                      <textarea data-testid="input-rca-note" rows={2} className="field" value={note} onChange={(e) => setNote(e.target.value)} />
+                    <Field label={role === 'Auditee' ? 'Submission / Draft note (optional)' : 'Auditor note / Disposition reason'} error={err}>
+                      <textarea
+                        data-testid="input-rca-note"
+                        rows={2}
+                        className="field"
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        placeholder={role === 'Auditee' ? 'Notes or explanation for this revision...' : 'Auditor reason, notes or guidance...'}
+                      />
                     </Field>
-                    {editable ? (
-                      <div className="flex flex-wrap gap-2">
-                        <Btn data-testid="button-save-draft" onClick={() => save(false)}><Save className="h-3.5 w-3.5" /> Save draft</Btn>
-                        <Btn data-testid="button-submit-rca" variant="primary" onClick={() => save(true)}><Send className="h-3.5 w-3.5" /> Submit 8D (+1 round)</Btn>
-                      </div>
-                    ) : (
-                      <div className="flex flex-wrap gap-2">
-                        <Btn data-testid="button-accept-rca" variant="primary" disabled={f.rca.status !== 'Submitted'} onClick={() => dispose('accept')}><Check className="h-3.5 w-3.5" /> Accept</Btn>
-                        <Btn data-testid="button-reject-rca" variant="danger" disabled={f.rca.status !== 'Submitted'} onClick={() => dispose('reject')}><X className="h-3.5 w-3.5" /> Reject to revision</Btn>
-                        <Btn data-testid="button-na-rca" onClick={() => dispose('na')}><Ban className="h-3.5 w-3.5" /> Mark NA</Btn>
-                      </div>
-                    )}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Btn data-testid="button-save-draft" onClick={() => save(false)}>
+                        <Save className="h-3.5 w-3.5" /> {role === 'Auditor' ? 'Save changes' : 'Save draft'}
+                      </Btn>
+                      {role === 'Auditee' && (
+                        <Btn data-testid="button-submit-rca" variant="primary" onClick={() => save(true)}>
+                          <Send className="h-3.5 w-3.5" /> Submit 8D (+1 round)
+                        </Btn>
+                      )}
+                      {role === 'Auditor' && (
+                        <>
+                          <span className="mx-1 h-5 w-px bg-border" />
+                          <Btn
+                            data-testid="button-accept-rca"
+                            variant="primary"
+                            disabled={f.rca.status !== 'Submitted'}
+                            onClick={() => dispose('accept')}
+                          >
+                            <Check className="h-3.5 w-3.5" /> Accept 8D
+                          </Btn>
+                          <Btn
+                            data-testid="button-reject-rca"
+                            variant="danger"
+                            disabled={f.rca.status !== 'Submitted'}
+                            onClick={() => dispose('reject')}
+                          >
+                            <X className="h-3.5 w-3.5" /> Reject to revision
+                          </Btn>
+                          <Btn data-testid="button-na-rca" onClick={() => dispose('na')}>
+                            <Ban className="h-3.5 w-3.5" /> Mark NA
+                          </Btn>
+                        </>
+                      )}
+                    </div>
                   </div>
                 )}
               </Panel>

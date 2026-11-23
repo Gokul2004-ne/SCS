@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
-import { Plus, Pencil, ChevronRight, Trash2 } from 'lucide-react';
+import { Plus, Pencil, ChevronRight, Trash2, Radio, MapPin, Camera, ShieldCheck } from 'lucide-react';
 import { useStore, stageOf } from '@/lib/store';
 import { Btn, Empty, Field, Modal, PageHead, Panel, Pill, fmtDate } from '@/components/kit';
 import { useToast } from '@/hooks/use-toast';
-import type { Audit, AuditStatus } from '@/lib/types';
+import type { Audit, AuditStatus, GeoRecord } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { AuditExport } from '@/components/audit-export';
+import { GeoTrackingModal } from '@/components/geo-tracking-modal';
+import { ensureAuditGeoTracking, getFacilityForUnit } from '@/lib/geo';
 
 const LIFECYCLE: AuditStatus[] = ['Planned', 'Fieldwork', 'Reporting', 'Follow-up', 'Closed'];
 const blank = { id: '', title: '', scope: '', unit: '', frameworkIds: [] as string[], start: '', end: '', lead: '', auditeeRep: '', status: 'Planned' as AuditStatus };
@@ -19,6 +21,7 @@ export default function Audits() {
   const [form, setForm] = useState(blank);
   const [tried, setTried] = useState(false);
   const [del, setDel] = useState<string | null>(null);
+  const [geoModal, setGeoModal] = useState<{ audit: Audit; mode: 'start' | 'view' | 'close' } | null>(null);
 
   const errs: Record<string, string> = {
     title: form.title.trim().length < 5 ? 'Title min 5 characters' : '',
@@ -49,24 +52,119 @@ export default function Audits() {
       const n = state.audits.length + 1;
       const id = `AP-${yr}-${String(n).padStart(2, '0')}`;
       mutate('Audit created', id, (d) => {
-        d.audits.push({ ...form, id, signoffs: { impAuditor: null, impAuditee: null, confAuditor: null, confAuditee: null } });
+        d.audits.push({
+          ...form,
+          id,
+          signoffs: { impAuditor: null, impAuditee: null, confAuditor: null, confAuditee: null },
+          geoTracking: {
+            status: 'Not Initialized',
+            facility: getFacilityForUnit(form.unit),
+            pings: [],
+            clausesUnlocked: false,
+          },
+        });
       });
       toast({ title: `${id} added to programme` });
     }
     setOpen(false);
   };
 
+  const handleGeoSuccess = (auditId: string, record: GeoRecord, nextStatus?: 'Fieldwork' | 'Closed') => {
+    mutate(
+      nextStatus === 'Closed'
+        ? 'Audit closed with on-site GPS verification'
+        : nextStatus === 'Fieldwork'
+        ? 'Audit initialized with GPS geo-tracking and photo'
+        : 'Auditor photo & GPS telemetry updated',
+      auditId,
+      (d) => {
+        const a = d.audits.find((x) => x.id === auditId);
+        if (!a) return;
+        const currentTracking = ensureAuditGeoTracking(a);
+        if (nextStatus === 'Closed') {
+          a.status = 'Closed';
+          a.geoTracking = {
+            ...currentTracking,
+            status: 'Completed',
+            endRecord: record,
+            pings: [
+              ...currentTracking.pings,
+              {
+                lat: record.lat,
+                lng: record.lng,
+                timestamp: record.timestamp,
+                withinGeofence: record.withinGeofence,
+                distanceMeters: record.distanceMeters,
+                note: 'Audit closed - verified inside laboratory',
+              },
+            ],
+          };
+        } else if (nextStatus === 'Fieldwork') {
+          a.status = 'Fieldwork';
+          a.geoTracking = {
+            ...currentTracking,
+            status: 'Active',
+            startRecord: record,
+            pings: [
+              ...currentTracking.pings,
+              {
+                lat: record.lat,
+                lng: record.lng,
+                timestamp: record.timestamp,
+                withinGeofence: record.withinGeofence,
+                distanceMeters: record.distanceMeters,
+                note: 'Fieldwork initialized - auditor photo & GPS verified',
+              },
+            ],
+            clausesUnlocked: true,
+          };
+        } else {
+          // Update photo & telemetry in-place
+          a.geoTracking = {
+            ...currentTracking,
+            startRecord: record,
+            pings: [
+              ...currentTracking.pings,
+              {
+                lat: record.lat,
+                lng: record.lng,
+                timestamp: record.timestamp,
+                withinGeofence: record.withinGeofence,
+                distanceMeters: record.distanceMeters,
+                note: 'Auditor photo & GPS telemetry updated',
+              },
+            ],
+          };
+        }
+      },
+    );
+  };
+
   const advance = (a: Audit, dir: 1 | -1) => {
     const i = LIFECYCLE.indexOf(a.status) + dir;
     if (i < 0 || i >= LIFECYCLE.length) return;
     const next = LIFECYCLE[i];
+
+    // If moving from Planned to Fieldwork, require GPS Geotag & Photo initialization
+    if (dir === 1 && a.status === 'Planned' && next === 'Fieldwork') {
+      const tracking = ensureAuditGeoTracking(a);
+      if (!tracking.startRecord) {
+        setGeoModal({ audit: a, mode: 'start' });
+        return;
+      }
+    }
+
     if (next === 'Closed') {
       const open = state.findings.filter((f) => f.auditId === a.id && !f.closedAt && f.p1Status !== 'Withdrawn');
       if (open.length) {
         toast({ title: 'Audit cannot close', description: `${open.length} finding(s) remain open: ${open.map((f) => f.id).join(', ')}` });
         return;
       }
+      // Audio requirement: Auditor must be inside laboratory premises to close audit!
+      setGeoModal({ audit: a, mode: 'close' });
+      return;
     }
+
     mutate(`Audit status ${a.status} to ${next}`, a.id, (d) => { d.audits.find((x) => x.id === a.id)!.status = next; });
   };
 
@@ -97,6 +195,8 @@ export default function Audits() {
             const fs = state.findings.filter((f) => f.auditId === a.id);
             const signed = Object.values(a.signoffs).filter(Boolean).length;
             const idx = LIFECYCLE.indexOf(a.status);
+            const tracking = ensureAuditGeoTracking(a);
+
             return (
               <Panel key={a.id} className="overflow-hidden">
                 <div className="grid gap-4 p-4 lg:grid-cols-[1fr_auto]">
@@ -104,10 +204,64 @@ export default function Audits() {
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-[12.5px] font-semibold text-[hsl(var(--saffron))]" data-testid={`text-audit-${a.id}`}>{a.id}</span>
                       <Pill t={a.status === 'Closed' ? 'teal' : a.status === 'Planned' ? 'slate' : 'indigo'}>{a.status}</Pill>
+                      {tracking.status === 'Active' ? (
+                        <button
+                          type="button"
+                          onClick={() => setGeoModal({ audit: a, mode: 'view' })}
+                          className="inline-flex items-center gap-1.5 rounded-[4px] border border-[hsl(var(--teal)/.5)] bg-[hsl(var(--teal)/.12)] px-2 py-0.5 text-[11px] font-medium text-[hsl(var(--teal))] hover:bg-[hsl(var(--teal)/.2)] transition-colors cursor-pointer"
+                          title="Click to view live GPS radar and tracking telemetry"
+                          data-testid={`badge-gps-active-${a.id}`}
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--teal))] animate-ping" />
+                          <Radio className="h-3 w-3" /> GPS Active ({tracking.startRecord?.distanceMeters ?? 14}m in premises)
+                        </button>
+                      ) : tracking.status === 'Completed' ? (
+                        <button
+                          type="button"
+                          onClick={() => setGeoModal({ audit: a, mode: 'view' })}
+                          className="inline-flex items-center gap-1 rounded-[4px] border border-border bg-muted/60 px-2 py-0.5 text-[11px] text-muted-foreground hover:bg-muted transition-colors cursor-pointer"
+                          data-testid={`badge-gps-completed-${a.id}`}
+                        >
+                          <ShieldCheck className="h-3 w-3 text-[hsl(var(--teal))]" /> GPS Verified Closure
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setGeoModal({ audit: a, mode: 'start' })}
+                          className="inline-flex items-center gap-1 rounded-[4px] border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-500 hover:bg-amber-500/20 transition-colors cursor-pointer"
+                          data-testid={`badge-gps-pending-${a.id}`}
+                        >
+                          <MapPin className="h-3 w-3" /> GPS Tracking Pending
+                        </button>
+                      )}
                       {a.frameworkIds.map((id) => <Pill key={id} t="slate">{state.frameworks.find((f) => f.id === id)?.code ?? id}</Pill>)}
                     </div>
                     <h3 className="font-display mt-1.5 text-[20px] text-primary">{a.title}</h3>
                     <p className="mt-1 max-w-3xl text-[12.5px] text-muted-foreground">{a.scope}</p>
+
+                    {/* Geotagged Auditor Photo & Verification Banner if initialized */}
+                    {tracking.startRecord && (
+                      <div className="mt-3 flex items-center gap-3 rounded-md border border-border/80 bg-muted/30 p-2 text-[11.5px]">
+                        <img
+                          src={tracking.startRecord.photo}
+                          alt="Auditor on-site photo"
+                          className="h-11 w-11 shrink-0 rounded object-cover border border-border shadow-xs"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 font-medium text-primary">
+                            <ShieldCheck className="h-3.5 w-3.5 text-[hsl(var(--teal))]" />
+                            <span>Auditor On-Site Verified: <span className="font-mono">{tracking.startRecord.auditor}</span></span>
+                          </div>
+                          <div className="font-mono text-[10.5px] text-muted-foreground">
+                            {tracking.startRecord.lat.toFixed(5)}°N, {tracking.startRecord.lng.toFixed(5)}°E • {tracking.facility.name} • {new Date(tracking.startRecord.timestamp).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </div>
+                        <Btn variant="outline" className="!py-1 !px-2.5 !text-[11px]" onClick={() => setGeoModal({ audit: a, mode: 'view' })}>
+                          <Radio className="h-3 w-3" /> View Radar
+                        </Btn>
+                      </div>
+                    )}
+
                     <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1.5 text-[12px] md:grid-cols-4">
                       <div><dt className="text-muted-foreground">Unit</dt><dd className="font-medium">{a.unit}</dd></div>
                       <div><dt className="text-muted-foreground">Window</dt><dd className="font-mono">{fmtDate(a.start)} - {fmtDate(a.end)}</dd></div>
@@ -118,6 +272,16 @@ export default function Audits() {
                   <div className="flex flex-col items-start gap-2 lg:items-end">
                     <AuditExport auditId={a.id} />
                     <div className="flex gap-1.5">
+                      {a.status === 'Planned' && (
+                        <Btn
+                          variant="primary"
+                          data-testid={`button-init-gps-${a.id}`}
+                          disabled={role !== 'Auditor'}
+                          onClick={() => setGeoModal({ audit: a, mode: 'start' })}
+                        >
+                          <Radio className="h-3.5 w-3.5" /> Initialize GPS & Photo
+                        </Btn>
+                      )}
                       <Btn data-testid={`button-edit-audit-${a.id}`} disabled={role !== 'Auditor'} onClick={() => openEdit(a)}><Pencil className="h-3.5 w-3.5" /> Edit</Btn>
                       <Btn data-testid={`button-delete-audit-${a.id}`} variant="ghost" disabled={role !== 'Auditor' || fs.length > 0} title={fs.length ? 'Audits with findings cannot be deleted' : ''} onClick={() => setDel(a.id)}><Trash2 className="h-3.5 w-3.5" /></Btn>
                     </div>
@@ -174,6 +338,16 @@ export default function Audits() {
       <Modal open={!!del} onClose={() => setDel(null)} title={`Delete ${del}?`} desc="Removes the planned audit. The deletion is recorded in the event log.">
         <div className="flex justify-end gap-2"><Btn onClick={() => setDel(null)}>Cancel</Btn><Btn data-testid="button-confirm-delete-audit" variant="danger" onClick={remove}>Delete</Btn></div>
       </Modal>
+
+      {geoModal && (
+        <GeoTrackingModal
+          open={!!geoModal}
+          onClose={() => setGeoModal(null)}
+          audit={geoModal.audit}
+          mode={geoModal.mode}
+          onSuccess={handleGeoSuccess}
+        />
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { Link } from 'wouter';
 import { ArrowLeft, ArrowRight, ClipboardCheck, FileSignature, Lock, KeyRound, FlaskConical } from 'lucide-react';
 import '@/components/public/public.css';
 import { Mark365, usePageMeta } from '@/components/public/shared';
+import { useOptionalStore } from '@/lib/store';
 
 export type Persona = 'auditor' | 'auditee';
 
@@ -65,6 +66,7 @@ function Chooser() {
 }
 
 function PersonaLogin({ persona }: { persona: Persona }) {
+  const store = useOptionalStore();
   const p = PERSONAS[persona];
   const other: Persona = persona === 'auditor' ? 'auditee' : 'auditor';
   usePageMeta(`${p.title} — Auditor 365`, `${p.title} for Auditor 365. Secure sign-in is awaiting account integration.`);
@@ -109,7 +111,23 @@ function PersonaLogin({ persona }: { persona: Persona }) {
             </p>
           </div>
         </div>
-        <Link href="/dashboard" className="btn-ghost shrink-0" data-testid="link-demo-workspace">
+        <Link
+          href="/dashboard"
+          onClick={() => {
+            const targetRole = persona === 'auditor' ? 'Auditor' : 'Auditee';
+            store?.setRole(targetRole);
+            try {
+              const raw = localStorage.getItem('kavach.workspace.v1');
+              if (raw) {
+                const s = JSON.parse(raw);
+                s.role = targetRole;
+                localStorage.setItem('kavach.workspace.v1', JSON.stringify(s));
+              }
+            } catch {}
+          }}
+          className="btn-ghost shrink-0"
+          data-testid="link-demo-workspace"
+        >
           Open demonstration workspace <ArrowRight className="h-4 w-4" />
         </Link>
       </section>

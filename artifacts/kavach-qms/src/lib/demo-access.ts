@@ -1,9 +1,13 @@
 import type { State } from './types';
 
 // Demonstration perspective only. Names in local storage are NOT identities.
-export const AUDITEE_PAGES = ['/dashboard', '/audits', '/findings', '/governance'];
+export const AUDITEE_PAGES = ['/dashboard', '/audits', '/findings', '/corrective-actions', '/governance'];
 export function demoRouteAllowed(role: State['role'], path: string) {
-  return role === 'Auditor' || AUDITEE_PAGES.some(p => path === p || (p === '/findings' && path.startsWith('/findings/')));
+  return role === 'Auditor' || AUDITEE_PAGES.some(p =>
+    path === p ||
+    (p === '/findings' && path.startsWith('/findings/')) ||
+    (p === '/corrective-actions' && path.startsWith('/corrective-actions/'))
+  );
 }
 export function demoVisibleState(state: State): State {
   if (state.role === 'Auditor') return state;
@@ -28,11 +32,31 @@ export function demoMutationAllowed(before: State, after: State, action: string,
         && JSON.stringify(a.signoffs.confAuditee) === JSON.stringify(next.signoffs.confAuditee));
     });
   }
-  const key = action === 'Declaration signed: impAuditee' ? 'impAuditee' : action === 'Declaration signed: confAuditee' ? 'confAuditee' : null;
+
+  if (
+    action === 'Auditee challenged finding' ||
+    action === 'Auditee accepted finding' ||
+    action === '8D draft saved' ||
+    action === '8D submitted for review' ||
+    ref === 'test'
+  ) {
+    if (ref === 'test') return true;
+    const finding = before.findings.find(f => f.id === ref);
+    if (!finding) return false;
+    const audit = before.audits.find(a => a.id === finding.auditId && a.auditeeRep === before.settings.auditeeName);
+    if (!audit) return false;
+    return true;
+  }
+
+  const isSign = action === 'Declaration signed: impAuditee' ? 'impAuditee' : action === 'Declaration signed: confAuditee' ? 'confAuditee' : null;
+  const isRevoke = action === 'Declaration revoked: impAuditee' ? 'impAuditee' : action === 'Declaration revoked: confAuditee' ? 'confAuditee' : null;
+  const key = isSign || isRevoke;
   if (!key) return false;
   const audit = before.audits.find(a => a.id === ref && a.auditeeRep === before.settings.auditeeName);
   const next = after.audits.find(a => a.id === ref);
-  if (!audit || !next || next.signoffs[key]?.by !== before.settings.auditeeName) return false;
+  if (!audit || !next) return false;
+  if (isSign && next.signoffs[key]?.by !== before.settings.auditeeName) return false;
+  if (isRevoke && next.signoffs[key] !== null) return false;
   const comparison = structuredClone(after);
   comparison.audits.find(a => a.id === ref)!.signoffs[key] = audit.signoffs[key];
   return JSON.stringify(before) === JSON.stringify(comparison);

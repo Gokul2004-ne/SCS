@@ -33,6 +33,9 @@ export default function Overview() {
     }
   });
   audits.forEach((a) => {
+    if (role === 'Auditor' && (a.status === 'Planned' || a.geoTracking?.status === 'Not Initialized')) {
+      queue.push({ id: a.id, text: 'Initialize on-site GPS & photo tracking to unlock fieldwork', href: '/audits' });
+    }
     const keys = role === 'Auditor' ? (['impAuditor', 'confAuditor'] as const) : (['impAuditee', 'confAuditee'] as const);
     const miss = keys.filter((k) => !a.signoffs[k]).length;
     if (miss && a.status !== 'Planned') queue.push({ id: a.id, text: `${miss} ${role.toLowerCase()} declaration(s) unsigned`, href: '/governance' });

@@ -82,6 +82,10 @@ export function useStore() {
   return c;
 }
 
+export function useOptionalStore() {
+  return useContext(StoreCtx);
+}
+
 export const nowIso = () => new Date().toISOString();
 
 export function totalIterations(f: Finding) {
