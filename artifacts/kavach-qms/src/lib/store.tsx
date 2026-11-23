@@ -2,6 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import type { State, Role, Finding, Audit, Settings } from './types';
 import { seedState } from './seed';
 import { digest } from './digest';
+import { demoMutationAllowed, demoVisibleState } from './demo-access';
+import { toast } from '@/hooks/use-toast';
 
 const KEY = 'kavach.workspace.v1';
 
@@ -40,6 +42,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setState((prev) => {
       const d: State = structuredClone(prev);
       fn(d);
+      if (!demoMutationAllowed(prev, d, action, ref)) {
+        queueMicrotask(() => toast({ title: 'Action not permitted', description: 'Auditees may only sign their own declarations. Auditors cannot change auditee declarations.' }));
+        return prev;
+      }
       const last = d.log[d.log.length - 1];
       const at = new Date().toISOString();
       const prevDigest = last ? last.digest : '0'.repeat(16);
@@ -64,7 +70,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const importState = useCallback((s: State) => setState(s), []);
 
   return (
-    <StoreCtx.Provider value={{ state, role: state.role, setRole, mutate, reset, importState }}>
+    <StoreCtx.Provider value={{ state: demoVisibleState(state), role: state.role, setRole, mutate, reset, importState }}>
       {children}
     </StoreCtx.Provider>
   );

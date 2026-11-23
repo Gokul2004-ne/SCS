@@ -6,6 +6,7 @@ import { Btn, Empty, Field, Modal, PageHead, Panel, Pill, fmtDate } from '@/comp
 import { useToast } from '@/hooks/use-toast';
 import type { Audit, AuditStatus } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { AuditExport } from '@/components/audit-export';
 
 const LIFECYCLE: AuditStatus[] = ['Planned', 'Fieldwork', 'Reporting', 'Follow-up', 'Closed'];
 const blank = { id: '', title: '', scope: '', unit: '', frameworkIds: [] as string[], start: '', end: '', lead: '', auditeeRep: '', status: 'Planned' as AuditStatus };
@@ -115,6 +116,7 @@ export default function Audits() {
                     </dl>
                   </div>
                   <div className="flex flex-col items-start gap-2 lg:items-end">
+                    <AuditExport auditId={a.id} />
                     <div className="flex gap-1.5">
                       <Btn data-testid={`button-edit-audit-${a.id}`} disabled={role !== 'Auditor'} onClick={() => openEdit(a)}><Pencil className="h-3.5 w-3.5" /> Edit</Btn>
                       <Btn data-testid={`button-delete-audit-${a.id}`} variant="ghost" disabled={role !== 'Auditor' || fs.length > 0} title={fs.length ? 'Audits with findings cannot be deleted' : ''} onClick={() => setDel(a.id)}><Trash2 className="h-3.5 w-3.5" /></Btn>

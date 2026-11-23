@@ -5,6 +5,7 @@ import { useStore } from '@/lib/store';
 import { exportCsv, exportJson } from '@/lib/export';
 import { cn } from '@/lib/utils';
 import type { Role } from '@/lib/types';
+import { demoRouteAllowed } from '@/lib/demo-access';
 
 const NAV = [
   { href: '/dashboard', label: 'Overview', icon: LayoutGrid, n: '00' },
@@ -58,7 +59,7 @@ export function Shell({ children }: { children: ReactNode }) {
 
   const nav = (
     <nav className="flex flex-col gap-0.5 px-3">
-      {NAV.map((n) => (
+      {NAV.filter(n => demoRouteAllowed(state.role, n.href)).map((n) => (
         <Link
           key={n.href}
           href={n.href}
@@ -135,7 +136,20 @@ export function Shell({ children }: { children: ReactNode }) {
             <RoleSwitch />
           </div>
         </div>
-        <main className="mx-auto max-w-[1400px] px-4 py-6 lg:px-8">{children}</main>
+        <main className="mx-auto max-w-[1400px] px-4 py-6 lg:px-8">
+          {state.role === 'Auditee' && <p className="mb-4 rounded border border-border bg-card p-3 text-xs">
+            Demonstration perspective: {state.settings.auditeeName}. Only audits assigned to this sample representative are shown. This is not authenticated access control.
+          </p>}
+          {!demoRouteAllowed(state.role, loc) ? (
+            <div className="rounded border border-border bg-card p-6">
+              <h1 className="text-xl font-semibold">Auditor workspace only</h1>
+              <p className="my-3 text-sm">Auditees can view Overview, Audit programme, Findings register and Governance gate.</p>
+              <Link href="/dashboard" className="underline">Return to Overview</Link>
+            </div>
+          ) : state.role === 'Auditee' && loc.startsWith('/findings/') ? (
+            <><p className="mb-3 text-xs text-muted-foreground">Read-only finding details. Auditee declarations are signed in Governance gate.</p><fieldset disabled className="min-w-0">{children}</fieldset></>
+          ) : <div key={state.role}>{children}</div>}
+        </main>
       </div>
     </div>
   );

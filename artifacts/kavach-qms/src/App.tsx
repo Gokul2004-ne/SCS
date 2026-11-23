@@ -27,7 +27,9 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Landing} />
-      <Route path="/login" component={Login} />
+      <Route path="/login">{() => <Login />}</Route>
+      <Route path="/login/auditor">{() => <Login persona="auditor" />}</Route>
+      <Route path="/login/auditee">{() => <Login persona="auditee" />}</Route>
       <Route component={AppRoutes} />
     </Switch>
   );
