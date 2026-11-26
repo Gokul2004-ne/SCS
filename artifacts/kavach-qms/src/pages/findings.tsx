@@ -319,7 +319,7 @@ export default function Findings() {
             <div>
               <div className="font-semibold">Audit {form.auditId} Fieldwork Not Initialized</div>
               <div>
-                In accordance with Defence QMS protocol, clause inspection and findings are locked until the Lead Auditor completes on-site GPS geo-tracking & photograph initialization.
+                In accordance with Security Control System QMS protocol, clause inspection and findings are locked until the Lead Auditor completes on-site GPS geo-tracking & photograph initialization.
               </div>
               <div className="mt-2">
                 <Link href="/audits" className="inline-flex items-center gap-1 font-semibold underline hover:opacity-80">

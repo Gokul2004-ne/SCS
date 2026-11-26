@@ -189,7 +189,7 @@ export function GeoTrackingModal({ open, onClose, audit, mode, onSuccess }: GeoT
     ctx.filter = 'none';
 
     if (includeWatermark) {
-      // Overlay professional defence watermark
+      // Overlay professional Security Control System watermark
       ctx.fillStyle = 'rgba(11, 19, 41, 0.9)';
       ctx.fillRect(0, 275, 520, 85);
       ctx.strokeStyle = '#f59e0b';
@@ -197,10 +197,11 @@ export function GeoTrackingModal({ open, onClose, audit, mode, onSuccess }: GeoT
       ctx.strokeRect(0, 275, 520, 85);
 
       ctx.fillStyle = '#f59e0b';
-      ctx.font = 'bold 11px monospace';
-      ctx.fillText(`DEFENCE QMS GEO-VERIFICATION // ${audit.id}`, 16, 296);
+      ctx.font = 'bold 9.5px monospace';
+      ctx.fillText(`SECURITY CONTROL SYSTEM QMS GEO-VERIFICATION // ${audit.id}`, 16, 296);
 
       ctx.fillStyle = '#10b981';
+      ctx.font = 'bold 10.5px monospace';
       ctx.textAlign = 'right';
       ctx.fillText(`PREMISES: ${within ? 'VERIFIED ON-SITE' : 'BREACH'}`, 504, 296);
 
@@ -230,7 +231,7 @@ export function GeoTrackingModal({ open, onClose, audit, mode, onSuccess }: GeoT
     const p = generateSampleAuditorPhoto(audit.lead, audit.id, lat, lng, nowIso());
     setPhoto(p);
     setPhotoDirty(true);
-    toast({ title: 'Authorized Defence Auditor Credential Badge generated' });
+    toast({ title: 'Authorized Security Control System Auditor Credential Badge generated' });
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -265,10 +266,11 @@ export function GeoTrackingModal({ open, onClose, audit, mode, onSuccess }: GeoT
             ctx.strokeRect(0, 275, 520, 85);
 
             ctx.fillStyle = '#f59e0b';
-            ctx.font = 'bold 11px monospace';
-            ctx.fillText(`DEFENCE QMS GEO-VERIFICATION // ${audit.id}`, 16, 296);
+            ctx.font = 'bold 9.5px monospace';
+            ctx.fillText(`SECURITY CONTROL SYSTEM QMS GEO-VERIFICATION // ${audit.id}`, 16, 296);
 
             ctx.fillStyle = '#10b981';
+            ctx.font = 'bold 10.5px monospace';
             ctx.textAlign = 'right';
             ctx.fillText(`PREMISES: ${within ? 'VERIFIED ON-SITE' : 'BREACH'}`, 504, 296);
 
@@ -462,7 +464,7 @@ export function GeoTrackingModal({ open, onClose, audit, mode, onSuccess }: GeoT
       }
       desc={
         mode === 'start'
-          ? 'Mandatory defence on-site auditor verification: Capture auditor photograph and verify presence within laboratory premises to unlock fieldwork and clauses.'
+          ? 'Mandatory Security Control System on-site auditor verification: Capture auditor photograph and verify presence within laboratory premises to unlock fieldwork and clauses.'
           : mode === 'close'
           ? 'Mandatory closure gate: Auditor must be physically present inside the laboratory premises to officially close this audit.'
           : 'Live monitoring of on-site auditor presence, geofence status, and audit breadcrumbs.'
@@ -571,7 +573,7 @@ export function GeoTrackingModal({ open, onClose, audit, mode, onSuccess }: GeoT
                   </div>
                   <div className="text-[13px] font-semibold text-foreground">No Photograph Captured</div>
                   <p className="max-w-xs text-[11.5px] text-muted-foreground">
-                    Take a live snapshot with your webcam, generate an authorized defence credential badge, or upload an image.
+                    Take a live snapshot with your webcam, generate an authorized Security Control System credential badge, or upload an image.
                   </p>
                   {cameraError && (
                     <div className="mt-1 flex items-center gap-1.5 text-[11px] text-amber-500">

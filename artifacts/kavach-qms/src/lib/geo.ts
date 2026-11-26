@@ -15,21 +15,21 @@ export const FACILITIES: Record<string, FacilityInfo> = {
     lat: 13.03582,
     lng: 77.59704,
     radiusMeters: 250,
-    locationDesc: 'Defence Avionics & Radar Complex, Jalahalli, Bengaluru (Karnataka)',
+    locationDesc: 'Security Control System Avionics & Radar Complex, Jalahalli, Bengaluru (Karnataka)',
   },
   'Software Engineering Cell (Demo Unit Bravo)': {
     name: 'Software Engineering Cell (Demo Unit Bravo)',
     lat: 17.44351,
     lng: 78.37724,
     radiusMeters: 300,
-    locationDesc: 'Defence Embedded Systems Centre, Kanchanbagh, Hyderabad (Telangana)',
+    locationDesc: 'Security Control System Embedded Systems Centre, Kanchanbagh, Hyderabad (Telangana)',
   },
-  'Default Defence Facility': {
+  'Default Security Control System Facility': {
     name: 'Integrated Quality & Metrology Wing',
     lat: 28.61394,
     lng: 77.20902,
     radiusMeters: 250,
-    locationDesc: 'Defence Research Headquarters, Central Complex, New Delhi',
+    locationDesc: 'Security Control System Research Headquarters, Central Complex, New Delhi',
   },
 };
 
@@ -38,7 +38,7 @@ export function getFacilityForUnit(unit: string): FacilityInfo {
   const found = Object.values(FACILITIES).find((f) => unit.toLowerCase().includes(f.name.toLowerCase()));
   if (found) return found;
   return {
-    name: unit || 'Defence Testing Facility',
+    name: unit || 'Security Control System Testing Facility',
     lat: 13.03582,
     lng: 77.59704,
     radiusMeters: 250,
@@ -81,7 +81,7 @@ export function createGeoDigest(
 }
 
 /**
- * Generates an auditor verification portrait badge with military/defence metadata watermark
+ * Generates an auditor verification portrait badge with Security Control System metadata watermark
  */
 export function generateSampleAuditorPhoto(
   auditorName: string,
@@ -123,7 +123,7 @@ export function generateSampleAuditorPhoto(
     <rect x="2" y="14" width="516" height="46" fill="#0c1733" opacity="0.95"/>
     <line x1="2" y1="60" x2="518" y2="60" stroke="#f59e0b" stroke-width="1" opacity="0.6"/>
 
-    <!-- Defence Crest / Shield Graphic -->
+    <!-- Security Control System Crest / Shield Graphic -->
     <g transform="translate(16, 20)">
       <polygon points="16,4 30,10 30,22 16,32 2,22 2,10" fill="#f59e0b" opacity="0.2"/>
       <polygon points="16,6 28,11 28,21 16,29 4,21 4,11" fill="none" stroke="#f59e0b" stroke-width="1.5"/>
@@ -131,8 +131,8 @@ export function generateSampleAuditorPhoto(
       <text x="16" y="21" fill="#0b1329" font-family="sans-serif" font-size="8" font-weight="900" text-anchor="middle">QA</text>
     </g>
 
-    <text x="56" y="33" fill="#f59e0b" font-family="monospace" font-size="10" font-weight="bold" letter-spacing="1.5">MINISTRY OF DEFENCE // GOVT. OF INDIA</text>
-    <text x="56" y="49" fill="#f8fafc" font-family="'IBM Plex Sans', sans-serif" font-size="12" font-weight="700" letter-spacing="0.5">DIRECTORATE GENERAL OF QUALITY ASSURANCE (DGQA)</text>
+    <text x="56" y="33" fill="#f59e0b" font-family="monospace" font-size="9.5" font-weight="bold" letter-spacing="1.2">SECURITY CONTROL SYSTEM // GOVT. OF INDIA</text>
+    <text x="56" y="49" fill="#f8fafc" font-family="'IBM Plex Sans', sans-serif" font-size="12" font-weight="700" letter-spacing="0.4">SECURITY CONTROL SYSTEM QUALITY ASSURANCE</text>
     <rect x="420" y="24" width="84" height="22" rx="3" fill="#10b981" opacity="0.18"/>
     <rect x="420" y="24" width="84" height="22" rx="3" fill="none" stroke="#10b981" stroke-width="1"/>
     <text x="462" y="39" fill="#10b981" font-family="monospace" font-size="9" font-weight="bold" text-anchor="middle">DGPS LOCKED</text>
@@ -170,7 +170,7 @@ export function generateSampleAuditorPhoto(
     <g transform="translate(180, 78)">
       <text x="0" y="16" fill="#94a3b8" font-family="monospace" font-size="9" font-weight="bold">AUTHORIZED LEAD AUDITOR</text>
       <text x="0" y="38" fill="#ffffff" font-family="'IBM Plex Sans', sans-serif" font-size="17" font-weight="700">${auditorName}</text>
-      <text x="0" y="56" fill="#38bdf8" font-family="monospace" font-size="10" font-weight="bold">DESIGNATION: DEFENCE QMS ASSESSOR</text>
+      <text x="0" y="56" fill="#38bdf8" font-family="monospace" font-size="9.5" font-weight="bold">DESIGNATION: SECURITY CONTROL SYSTEM QMS ASSESSOR</text>
 
       <line x1="0" y1="68" x2="316" y2="68" stroke="#1e293b" stroke-width="1"/>
 
@@ -178,7 +178,7 @@ export function generateSampleAuditorPhoto(
       <text x="130" y="86" fill="#fbbf24" font-family="monospace" font-size="10" font-weight="bold">SECRET // LEVEL-3</text>
 
       <text x="0" y="104" fill="#94a3b8" font-family="monospace" font-size="9">CREDENTIAL ID:</text>
-      <text x="130" y="104" fill="#f8fafc" font-family="monospace" font-size="10" font-weight="bold">DQA-IND-2026-${cleanId || '01'}</text>
+      <text x="130" y="104" fill="#f8fafc" font-family="monospace" font-size="10" font-weight="bold">SCS-IND-2026-${cleanId || '01'}</text>
 
       <text x="0" y="122" fill="#94a3b8" font-family="monospace" font-size="9">AUDIT REFERENCE:</text>
       <text x="130" y="122" fill="#f8fafc" font-family="monospace" font-size="10" font-weight="bold">${auditId}</text>
@@ -201,7 +201,7 @@ export function generateSampleAuditorPhoto(
     <rect x="16" y="262" width="488" height="84" rx="6" fill="#070d1e" stroke="#f59e0b" stroke-width="1.2"/>
     <rect x="16" y="262" width="488" height="20" rx="5" fill="#f59e0b" opacity="0.12"/>
     
-    <text x="28" y="276" fill="#f59e0b" font-family="monospace" font-size="9.5" font-weight="bold" letter-spacing="1">DEFENCE QMS GEO-VERIFICATION TELEMETRY // ${auditId}</text>
+    <text x="28" y="276" fill="#f59e0b" font-family="monospace" font-size="8.5" font-weight="bold" letter-spacing="0.3">SECURITY CONTROL SYSTEM QMS GEO-VERIFICATION // ${auditId}</text>
     <text x="492" y="276" fill="#10b981" font-family="monospace" font-size="9" font-weight="bold" text-anchor="end">TAMPER-EVIDENT RECORD</text>
 
     <text x="28" y="298" fill="#f8fafc" font-family="monospace" font-size="10.5">LAT/LONG: <tspan fill="#38bdf8" font-weight="bold">${lat.toFixed(6)}°N, ${lng.toFixed(6)}°E</tspan>  (±3.2m DGPS Accuracy)</text>
@@ -212,7 +212,7 @@ export function generateSampleAuditorPhoto(
     <g transform="translate(420, 286)">
       <circle cx="28" cy="24" r="20" fill="none" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="2,2"/>
       <circle cx="28" cy="24" r="16" fill="#f59e0b" opacity="0.15"/>
-      <text x="28" y="22" fill="#f59e0b" font-family="monospace" font-size="7" font-weight="bold" text-anchor="middle">DGQA</text>
+      <text x="28" y="22" fill="#f59e0b" font-family="monospace" font-size="7" font-weight="bold" text-anchor="middle">SCS</text>
       <text x="28" y="31" fill="#f59e0b" font-family="monospace" font-size="6.5" font-weight="bold" text-anchor="middle">INDIA</text>
     </g>
   </svg>`;

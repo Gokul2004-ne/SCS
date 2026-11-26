@@ -18,7 +18,7 @@ describe('Sequential Clause Evaluation and Objective Evidence Box', () => {
         lat: 13.03582,
         lng: 77.59704,
         radiusMeters: 250,
-        locationDesc: 'Defence Avionics & Radar Complex, Jalahalli, Bengaluru (Karnataka)',
+        locationDesc: 'Security Control System Avionics & Radar Complex, Jalahalli, Bengaluru (Karnataka)',
       },
       startRecord: {
         photo: 'data:image/svg+xml;utf8,<svg></svg>',
@@ -71,7 +71,7 @@ describe('Sequential Clause Evaluation and Objective Evidence Box', () => {
         lat: 13.03582,
         lng: 77.59704,
         radiusMeters: 250,
-        locationDesc: 'Defence Avionics & Radar Complex, Jalahalli, Bengaluru (Karnataka)',
+        locationDesc: 'Security Control System Avionics & Radar Complex, Jalahalli, Bengaluru (Karnataka)',
       },
       startRecord: {
         photo: 'data:image/svg+xml;utf8,<svg></svg>',
@@ -134,7 +134,7 @@ describe('Sequential Clause Evaluation and Objective Evidence Box', () => {
         lat: 13.03582,
         lng: 77.59704,
         radiusMeters: 250,
-        locationDesc: 'Defence Avionics & Radar Complex, Jalahalli, Bengaluru (Karnataka)',
+        locationDesc: 'Security Control System Avionics & Radar Complex, Jalahalli, Bengaluru (Karnataka)',
       },
       startRecord: {
         photo: 'data:image/svg+xml;utf8,<svg></svg>',

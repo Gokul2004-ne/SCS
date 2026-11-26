@@ -134,7 +134,7 @@ describe('GPS Geo-tracking and on-site photo verification', () => {
     const s = fixture('Auditor');
     const uninitAudit = {
       id: 'AP-26-88',
-      title: 'Uninitialized missile telemetry audit',
+      title: 'Uninitialized Security Control System telemetry audit',
       scope: 'Telemetry review',
       unit: 'Signals Test Laboratory (Demo Unit Alpha)',
       frameworkIds: ['iso17025'],

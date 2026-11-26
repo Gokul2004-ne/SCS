@@ -2,34 +2,25 @@ import { Link } from 'wouter';
 import { ArrowRight } from 'lucide-react';
 import '@/components/public/public.css';
 import { Lifecycle } from '@/components/public/lifecycle';
-import { Mark365, usePageMeta } from '@/components/public/shared';
+import { usePageMeta } from '@/components/public/shared';
 
 export default function Landing() {
   usePageMeta(
-    'Auditor 365 — Your AI-Powered Compliance Co-Pilot',
-    'Auditor 365 helps defence and NABL quality teams plan, evidence, log findings and close 8D corrective actions across ISO 17025, ISO 12207 and ISO 15504 / 330xx.',
+    'Integrated Audit & Compliance Assurance — Kavach QA',
+    'Helps Security Control System and NABL quality teams plan, evidence, log findings and close 8D corrective actions across ISO 17025, ISO 12207 and ISO 15504 / 330xx.',
   );
 
   return (
     <div className="a365" data-testid="page-landing">
       <div className="hatch-bar" />
-      <section className="relative min-h-[calc(100dvh-4px)] overflow-hidden">
+      <section className="relative flex min-h-[calc(100dvh-4px)] items-center overflow-hidden">
         <div className="grid-bg" /><div className="halo" />
-        <header className="nav">
-          <Link href="/" className="brand" data-testid="link-brand">
-            <Mark365 />
-            <div>
-              <div className="serif text-[21px] leading-none">Auditor 365</div>
-              <div className="mono mt-1 text-[9.5px] uppercase tracking-[0.22em] text-[#9AA6BC]">AI Twin · Kavach QA</div>
-            </div>
-          </Link>
-        </header>
 
-        <div className="relative z-[2] mx-auto grid max-w-[1320px] items-center gap-10 px-5 pb-16 pt-6 sm:px-10 lg:grid-cols-[1.05fr_1fr] lg:pt-10">
+        <div className="relative z-[2] mx-auto grid w-full max-w-[1320px] items-center gap-8 px-5 py-10 sm:px-10 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
-            <div className="kicker rv d1">Defence &amp; NABL quality assurance</div>
-            <h1 className="serif rv d2 mt-5 text-[clamp(40px,6.2vw,84px)] leading-[0.98] tracking-[-0.02em]" data-testid="text-headline">
-              Auditor 365 — Your <em className="text-[#F59E0B] not-italic">AI-Powered</em> Compliance Co-Pilot
+            <div className="kicker rv d1">Security Control System &amp; NABL quality assurance</div>
+            <h1 className="serif rv d2 mt-4 text-[clamp(30px,3.8vw,52px)] leading-[1.06] tracking-[-0.02em]" data-testid="text-headline">
+              Integrated Audit &amp; <em className="text-[#F59E0B] not-italic">Compliance</em> Assurance
             </h1>
             <p className="mono rv d3 mt-6 text-[13px] tracking-[0.14em] text-[#C7CFDD] sm:text-[15px]" data-testid="text-subheadline">
               ISO 17025 · ISO 12207 · ISO 15504 / 330xx

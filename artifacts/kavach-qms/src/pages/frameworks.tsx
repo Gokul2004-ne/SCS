@@ -144,7 +144,7 @@ export default function Frameworks() {
         </div>
       </Panel>
 
-      <Modal open={fwOpen} onClose={() => setFwOpen(false)} title="Configure additional framework" desc="For example a defence quality standard, contract-specific requirement, or an ISO/IEC 330xx assessment model.">
+      <Modal open={fwOpen} onClose={() => setFwOpen(false)} title="Configure additional framework" desc="For example a Security Control System quality standard, contract-specific requirement, or an ISO/IEC 330xx assessment model.">
         <div className="grid gap-3">
           <Field label="Code" error={fwTried ? fwErrs.code : ''}><input data-testid="input-fw-code" className="field" value={fwForm.code} onChange={(e) => setFwForm({ ...fwForm, code: e.target.value })} placeholder="e.g. ISO/IEC 33020" /></Field>
           <Field label="Name" error={fwTried ? fwErrs.name : ''}><input data-testid="input-fw-name" className="field" value={fwForm.name} onChange={(e) => setFwForm({ ...fwForm, name: e.target.value })} /></Field>

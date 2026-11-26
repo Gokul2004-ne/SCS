@@ -183,7 +183,7 @@ const findings: Finding[] = [
     id: 'AUD-007', auditId: 'AP-26-02', frameworkId: 'iso15504', clause: 'ENG.6 / SUP.8',
     title: 'Code review performed after merge',
     classification: 'Observation',
-    evidence: 'In 9 of 30 sampled merge requests on repository fire-ctl-core, review approval timestamp is later than merge timestamp. Branch protection permitted merge by maintainers without approval.',
+    evidence: 'In 9 of 30 sampled merge requests on repository security-control-core, review approval timestamp is later than merge timestamp. Branch protection permitted merge by maintainers without approval.',
     raisedAt: '2026-03-05T10:00:00Z', p1Status: 'Accepted', p1Iterations: 2,
     p1History: [
       m('Auditor', 0, 'Finding issued as Minor NC.', '2026-03-05T10:00:00Z', 'issued'),
@@ -244,7 +244,7 @@ export function seedState(): State {
         },
       },
       {
-        id: 'AP-26-02', title: 'Embedded software lifecycle process audit', scope: 'Fire-control and ground-control software: design definition, verification, configuration and review practices.',
+        id: 'AP-26-02', title: 'Embedded software lifecycle process audit', scope: 'Security Control System and ground-control software: design definition, verification, configuration and review practices.',
         unit: 'Software Engineering Cell (Demo Unit Bravo)', frameworkIds: ['iso12207', 'iso15504', 'iso9001'], start: '2026-03-02', end: '2026-03-06',
         lead: 'Auditor R. Menon (sample)', auditeeRep: 'Programme Engineer D. Rao (sample)', status: 'Follow-up',
         signoffs: {

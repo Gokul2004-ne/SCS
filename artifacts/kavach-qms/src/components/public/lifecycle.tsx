@@ -26,7 +26,7 @@ function usePrefersReducedMotion() {
   return r;
 }
 
-const C = 250, R = 178;
+const C = 250, R = 195;
 const pos = (i: number) => {
   const a = (i / STEPS.length) * Math.PI * 2 - Math.PI / 2;
   return { x: C + R * Math.cos(a), y: C + R * Math.sin(a), a };
@@ -51,8 +51,8 @@ export function Lifecycle() {
 
   return (
     <div className="relative" data-testid="lifecycle">
-      <div className="relative mx-auto aspect-square w-full max-w-[520px]">
-        <svg viewBox="-90 0 680 500" className="h-full w-full" role="group" aria-label="Eight-step audit lifecycle">
+      <div className="relative mx-auto aspect-[640/500] w-full max-w-[620px]">
+        <svg viewBox="-45 0 640 500" className="h-full w-full" role="group" aria-label="Eight-step audit lifecycle">
           <defs>
             <linearGradient id="a365arc" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0" stopColor="#F59E0B" stopOpacity=".25" />
@@ -60,8 +60,8 @@ export function Lifecycle() {
             </linearGradient>
           </defs>
           <g className="lc-sweep" aria-hidden>
-            <circle cx={C} cy={C} r={226} fill="none" stroke="rgba(226,232,240,.1)" strokeDasharray="2 10" />
-            <path d={`M ${C} ${C - 226} A 226 226 0 0 1 ${C + 226} ${C}`} fill="none" stroke="rgba(245,158,11,.35)" strokeWidth="1" />
+            <circle cx={C} cy={C} r={220} fill="none" stroke="rgba(226,232,240,.1)" strokeDasharray="2 10" />
+            <path d={`M ${C} ${C - 220} A 220 220 0 0 1 ${C + 220} ${C}`} fill="none" stroke="rgba(245,158,11,.35)" strokeWidth="1" />
           </g>
           <circle cx={C} cy={C} r={R} fill="none" stroke="rgba(226,232,240,.12)" strokeWidth="2" aria-hidden />
           <circle
@@ -69,21 +69,21 @@ export function Lifecycle() {
             strokeDasharray={circ} strokeDashoffset={circ * (1 - frac)} transform={`rotate(-90 ${C} ${C})`} aria-hidden
           />
           {[0, 1, 2, 3].map((k) => (
-            <line key={k} x1={C} y1={C - 120} x2={C} y2={C - 110} stroke="rgba(226,232,240,.25)" transform={`rotate(${k * 90} ${C} ${C})`} aria-hidden />
+            <line key={k} x1={C} y1={C - 134} x2={C} y2={C - 122} stroke="rgba(226,232,240,.25)" transform={`rotate(${k * 90} ${C} ${C})`} aria-hidden />
           ))}
-          <text x={C} y={C - 46} textAnchor="middle" className="mono" fontSize="11" letterSpacing="3" fill="#F59E0B" aria-hidden>
+          <text x={C} y={C - 48} textAnchor="middle" className="mono" fontSize="11" letterSpacing="3" fill="#F59E0B" aria-hidden>
             STEP {String(active + 1).padStart(2, '0')} / 08
           </text>
           <text key={step.id} x={C} y={C + 4} textAnchor="middle" className="serif lc-detail" fontSize={step.label.length > 12 ? 28 : 36} fill="#EEF0F4" aria-hidden>
             {step.label}
           </text>
-          <text x={C} y={C + 36} textAnchor="middle" fontSize="11" fill="#9AA6BC" letterSpacing="1.5" aria-hidden>
+          <text x={C} y={C + 38} textAnchor="middle" fontSize="11" fill="#9AA6BC" letterSpacing="1.5" aria-hidden>
             {active === STEPS.length - 1 ? 'LOOPS TO PLAN' : `NEXT · ${STEPS[active + 1].label.toUpperCase()}`}
           </text>
           {STEPS.map((s, i) => {
             const p = pos(i);
             const on = i === active, done = i < active;
-            const lx = C + (R + 44) * Math.cos(p.a), ly = C + (R + 44) * Math.sin(p.a);
+            const lx = C + (R + 38) * Math.cos(p.a), ly = C + (R + 38) * Math.sin(p.a);
             return (
               <g
                 key={s.id} className="lc-node" role="button" tabIndex={0}

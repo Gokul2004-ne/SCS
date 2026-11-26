@@ -1,8 +1,8 @@
 ---
-name: Defence assurance product scope
+name: Security Control System assurance product scope
 description: User's intended audience and source-workbench governance semantics.
 ---
-The user wants a professional end-to-end auditor/auditee QMS/IMS product design suitable for an Indian Army Defence proposal and reusable for implementing the full solution. Coverage includes NABL laboratories and the listed laboratory, quality, certification, inspection, AI-management and software lifecycle/process-assessment frameworks.
+The user wants a professional end-to-end auditor/auditee QMS/IMS product design suitable for a Security Control System proposal and reusable for implementing the full solution. Coverage includes NABL laboratories and the listed laboratory, quality, certification, inspection, AI-management and software lifecycle/process-assessment frameworks.
 
 **Why:** The user requested product design and workflows to propose the niche solution, not a claim of accreditation or production security.
 
